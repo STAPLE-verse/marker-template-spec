@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "description": "Development tooling for the MARKER Metadata Template Specification",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate": "npm run validate:schema && npm run validate:rules",
+    "validate:schema": "node scripts/validate-json-schema.mjs",
+    "validate:rules": "node --test tests/conformance/*.test.mjs",
+    "test": "npm run validate",
+    "check": "npm run validate"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}
