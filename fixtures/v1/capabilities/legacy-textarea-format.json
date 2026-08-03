@@ -1,0 +1,22 @@
+{
+  "id": "legacy-textarea-format",
+  "description": "Legacy STAPLE multiline intent encoded as an unknown JSON Schema format.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "description": { "type": "string", "format": "textarea", "title": "Description" }
+    }
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "format is ignored as an annotation", "data": { "description": "Text" } }],
+    "invalid": [{ "label": "base string type still applies", "data": { "description": 42 } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Current RJSF selects its textarea widget even though AJV treats the format as unknown." },
+    "formStudioAuthoring": { "status": "lossy", "reason": "Studio classifies the field as a short answer." },
+    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the legacy textarea format even though the visual classification is unsafe." },
+    "stapleDeployment": { "status": "pass", "reason": "Current STAPLE RJSF 5 selects a textarea, although the format remains non-standard." }
+  }
+}

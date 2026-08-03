@@ -1,0 +1,32 @@
+{
+  "id": "legacy-hidden-readonly-field",
+  "description": "The hidden read-only schema-version marker present in current STAPLE built-in forms.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "_stapleSchema": {
+        "type": "string",
+        "default": "data-v1",
+        "title": "Schema version",
+        "readOnly": true
+      }
+    }
+  },
+  "uiSchema": {
+    "_stapleSchema": {
+      "ui:widget": "hidden"
+    },
+    "ui:order": ["_stapleSchema"]
+  },
+  "instances": {
+    "valid": [{ "label": "matching schema marker", "data": { "_stapleSchema": "data-v1" } }],
+    "invalid": [{ "label": "schema marker must remain a string", "data": { "_stapleSchema": 1 } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF preserves the hidden presentation and read-only schema annotation." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "The marker must be shown as an explicit read-only compatibility field, not a short-answer editor." },
+    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the readOnly annotation and hidden widget." },
+    "stapleDeployment": { "status": "pass", "reason": "This exact pattern appears in every current STAPLE built-in form." }
+  }
+}

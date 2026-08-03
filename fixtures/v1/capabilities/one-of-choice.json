@@ -1,0 +1,29 @@
+{
+  "id": "one-of-choice",
+  "description": "A standalone oneOf choice with two constant alternatives.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "contactMethod": {
+        "title": "Contact method",
+        "oneOf": [
+          { "const": "email", "title": "Email" },
+          { "const": "phone", "title": "Phone" }
+        ]
+      }
+    },
+    "required": ["contactMethod"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "one listed alternative", "data": { "contactMethod": "email" } }],
+    "invalid": [{ "label": "no matching alternative", "data": { "contactMethod": "post" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF renders oneOf alternatives." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "Studio does not generally author standalone oneOf schemas." },
+    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the standalone oneOf property schema." },
+    "stapleDeployment": { "status": "pass", "reason": "The deployed RJSF stack supports oneOf." }
+  }
+}

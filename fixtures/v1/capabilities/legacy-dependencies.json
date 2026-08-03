@@ -1,0 +1,37 @@
+{
+  "id": "legacy-dependencies",
+  "description": "A draft-07 value-dependent schema using the legacy dependencies keyword.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "kind": { "type": "string", "enum": ["basic", "extended"] }
+    },
+    "required": ["kind"],
+    "dependencies": {
+      "kind": {
+        "oneOf": [
+          { "properties": { "kind": { "const": "basic" } } },
+          {
+            "properties": {
+              "kind": { "const": "extended" },
+              "details": { "type": "string", "minLength": 1 }
+            },
+            "required": ["details"]
+          }
+        ]
+      }
+    }
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "extended with details", "data": { "kind": "extended", "details": "Additional context" } }],
+    "invalid": [{ "label": "extended without details", "data": { "kind": "extended" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF supports draft-07 dependencies." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio has explicit value-dependency authoring support." },
+    "formStudioPreservation": { "status": "lossy", "reason": "Studio currently reconstructs the dependency subtree even during a no-op visual round trip." },
+    "stapleDeployment": { "status": "pass", "reason": "The deployed RJSF stack supports the draft-07 keyword." }
+  }
+}

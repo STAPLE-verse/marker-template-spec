@@ -1,0 +1,34 @@
+{
+  "id": "scalar-array",
+  "description": "A repeatable list of strings.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "keywords": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 },
+        "minItems": 1,
+        "maxItems": 5,
+        "uniqueItems": true
+      }
+    },
+    "required": ["keywords"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "unique strings", "data": { "keywords": ["FAIR", "metadata"] } }],
+    "invalid": [
+      { "label": "duplicate strings", "data": { "keywords": ["FAIR", "FAIR"] } },
+      { "label": "empty array", "data": { "keywords": [] } },
+      { "label": "too many items", "data": { "keywords": ["one", "two", "three", "four", "five", "six"] } },
+      { "label": "empty string item", "data": { "keywords": [""] } }
+    ]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF renders scalar arrays." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "The generic array authoring control is currently disabled." },
+    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the scalar item schema and array constraints." },
+    "stapleDeployment": { "status": "pass", "reason": "The research-data built-in contains an array of strings." }
+  }
+}

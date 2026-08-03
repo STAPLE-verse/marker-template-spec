@@ -1,0 +1,24 @@
+{
+  "id": "textarea-widget",
+  "description": "Portable multiline presentation expressed through uiSchema.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "description": { "type": "string", "title": "Description" }
+    },
+    "required": ["description"]
+  },
+  "uiSchema": {
+    "description": { "ui:widget": "textarea" }
+  },
+  "instances": {
+    "valid": [{ "label": "multiline string", "data": { "description": "First line\nSecond line" } }],
+    "invalid": [{ "label": "non-string value", "data": { "description": 42 } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Textarea is a standard RJSF widget." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio recognizes the long-answer field." },
+    "stapleDeployment": { "status": "pass", "reason": "The project built-in uses this representation." }
+  }
+}

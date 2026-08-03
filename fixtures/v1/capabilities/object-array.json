@@ -1,0 +1,41 @@
+{
+  "id": "object-array",
+  "description": "A repeatable structured section represented as an array of objects.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "contributors": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "role": { "type": "string" }
+          },
+          "required": ["name"]
+        }
+      }
+    }
+  },
+  "uiSchema": {
+    "contributors": {
+      "items": {
+        "ui:order": ["name", "role"],
+        "name": {
+          "ui:placeholder": "Contributor name"
+        }
+      }
+    }
+  },
+  "instances": {
+    "valid": [{ "label": "structured contributor", "data": { "contributors": [{ "name": "Ada", "role": "Creator" }] } }],
+    "invalid": [{ "label": "required nested name missing", "data": { "contributors": [{ "role": "Creator" }] } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF supports arrays of objects." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "Studio has no reliable visual authoring path for object arrays." },
+    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the object item schema and nested array UI subtree." },
+    "stapleDeployment": { "status": "pass", "reason": "RJSF can deploy it, though no built-in currently exercises it." }
+  }
+}

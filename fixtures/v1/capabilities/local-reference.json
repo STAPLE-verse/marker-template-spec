@@ -1,0 +1,29 @@
+{
+  "id": "local-reference",
+  "description": "A draft-07 local reusable definition referenced by a property.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "urn:marker:fixture:local-reference",
+    "type": "object",
+    "definitions": {
+      "identifier": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "properties": {
+      "identifier": { "$ref": "#/definitions/identifier" }
+    },
+    "required": ["identifier"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "non-empty identifier", "data": { "identifier": "doi:10.1234/example" } }],
+    "invalid": [{ "label": "empty identifier", "data": { "identifier": "" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF supports local JSON Pointer references." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio supports local references under definitions." },
+    "stapleDeployment": { "status": "blocked", "reason": "Current preprocessing removes $id and $ref before rendering." }
+  }
+}

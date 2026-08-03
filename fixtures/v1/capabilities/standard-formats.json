@@ -1,0 +1,24 @@
+{
+  "id": "standard-formats",
+  "description": "Standard date, email, and URI string formats used by STAPLE.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "issued": { "type": "string", "format": "date" },
+      "contact": { "type": "string", "format": "email" },
+      "landingPage": { "type": "string", "format": "uri" }
+    },
+    "required": ["issued", "contact", "landingPage"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "well-formed values", "data": { "issued": "2026-07-31", "contact": "researcher@example.edu", "landingPage": "https://staplescience.com/" } }],
+    "invalid": [{ "label": "malformed values", "data": { "issued": "31-07-2026", "contact": "not-an-email", "landingPage": "not a URI" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Supported by RJSF and ajv-formats." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio exposes these format choices." },
+    "stapleDeployment": { "status": "pass", "reason": "All three occur in current built-ins." }
+  }
+}

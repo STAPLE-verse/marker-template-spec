@@ -1,0 +1,25 @@
+{
+  "id": "required-string",
+  "description": "A minimal required text field.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "title": "Title"
+      }
+    },
+    "required": ["title"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "title supplied", "data": { "title": "Study" } }],
+    "invalid": [{ "label": "title missing", "data": {} }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Native RJSF text field." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Native short-answer field." },
+    "stapleDeployment": { "status": "pass", "reason": "Used throughout the built-in templates." }
+  }
+}

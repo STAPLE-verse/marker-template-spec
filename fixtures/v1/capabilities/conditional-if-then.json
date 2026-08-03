@@ -1,0 +1,38 @@
+{
+  "id": "conditional-if-then",
+  "description": "A field that becomes required when a controlling value is selected.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "access": { "type": "string", "enum": ["open", "restricted"] }
+    },
+    "required": ["access"],
+    "allOf": [
+      {
+        "if": { "properties": { "access": { "const": "restricted" } } },
+        "then": {
+          "properties": { "restrictionReason": { "type": "string", "minLength": 1 } },
+          "required": ["restrictionReason"]
+        }
+      }
+    ]
+  },
+  "uiSchema": {
+    "ui:order": ["access", "restrictionReason"],
+    "restrictionReason": {
+      "ui:widget": "textarea",
+      "ui:placeholder": "Explain the restriction"
+    }
+  },
+  "instances": {
+    "valid": [{ "label": "restricted with reason", "data": { "access": "restricted", "restrictionReason": "Embargo" } }],
+    "invalid": [{ "label": "restricted without reason", "data": { "access": "restricted" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF and AJV evaluate draft-07 conditionals." },
+    "formStudioAuthoring": { "status": "lossy", "reason": "Studio does not model allOf branches and drops conditional-only UI ordering on round trip." },
+    "formStudioPreservation": { "status": "lossy", "reason": "Conditional-only UI paths are currently dropped during visual round trip." },
+    "stapleDeployment": { "status": "pass", "reason": "This pattern occurs in the data and document built-ins." }
+  }
+}

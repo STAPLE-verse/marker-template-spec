@@ -1,0 +1,26 @@
+{
+  "id": "enum-choice",
+  "description": "A closed string choice represented with enum.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "access": {
+        "type": "string",
+        "title": "Access",
+        "enum": ["open", "restricted", "closed"]
+      }
+    },
+    "required": ["access"]
+  },
+  "uiSchema": {},
+  "instances": {
+    "valid": [{ "label": "listed value", "data": { "access": "open" } }],
+    "invalid": [{ "label": "unlisted value", "data": { "access": "unknown" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Native select field." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio supports dropdown and radio variants." },
+    "stapleDeployment": { "status": "pass", "reason": "Enums are used in built-in templates." }
+  }
+}

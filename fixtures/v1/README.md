@@ -3,6 +3,7 @@
 Fixtures will be organized by validation stage and expected result:
 
 ```text
+capabilities/          Non-normative probes for candidate form capabilities
 valid/                 Documents expected to conform
 invalid/package/       Outer document failures
 invalid/components/    Form schema or UI schema failures
@@ -25,3 +26,7 @@ JSON Schema fixtures use the following convention:
 
 Rules that require relationships between components or application-specific
 compatibility checks belong in `tests/conformance/`.
+
+Capability fixtures are deliberately outside `valid/` and `invalid/` until
+Core V1 is frozen. They describe and test current software behavior without
+making a normative conformance decision.

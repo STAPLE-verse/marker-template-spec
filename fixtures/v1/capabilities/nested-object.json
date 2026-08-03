@@ -1,0 +1,32 @@
+{
+  "id": "nested-object",
+  "description": "A nested object used as a visual and structural section.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "contact": {
+        "type": "object",
+        "title": "Contact",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" }
+        },
+        "required": ["name"]
+      }
+    },
+    "required": ["contact"]
+  },
+  "uiSchema": {
+    "contact": { "ui:order": ["name", "email"] }
+  },
+  "instances": {
+    "valid": [{ "label": "nested contact", "data": { "contact": { "name": "Ada", "email": "ada@example.edu" } } }],
+    "invalid": [{ "label": "nested name missing", "data": { "contact": { "email": "ada@example.edu" } } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "Native nested object rendering." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio represents nested objects as sections." },
+    "stapleDeployment": { "status": "pass", "reason": "The deployed RJSF stack supports nested objects." }
+  }
+}
