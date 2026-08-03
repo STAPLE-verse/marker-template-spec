@@ -31,8 +31,8 @@
   },
   "expectations": {
     "rjsfRendering": { "status": "pass", "reason": "RJSF and AJV evaluate draft-07 conditionals." },
-    "formStudioAuthoring": { "status": "lossy", "reason": "Studio does not model allOf branches and drops conditional-only UI ordering on round trip." },
-    "formStudioPreservation": { "status": "lossy", "reason": "Conditional-only UI paths are currently dropped during visual round trip." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "Studio reports allOf rules as non-editable while preserving them unchanged." },
+    "formStudioPreservation": { "status": "pass", "reason": "Conditional branches, conditional-only UI paths, and ui:order entries survive unrelated visual edits." },
     "stapleDeployment": { "status": "pass", "reason": "This pattern occurs in the data and document built-ins." }
   }
 }

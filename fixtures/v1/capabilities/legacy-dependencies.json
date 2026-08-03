@@ -31,7 +31,7 @@
   "expectations": {
     "rjsfRendering": { "status": "pass", "reason": "RJSF supports draft-07 dependencies." },
     "formStudioAuthoring": { "status": "pass", "reason": "Studio has explicit value-dependency authoring support." },
-    "formStudioPreservation": { "status": "lossy", "reason": "Studio currently reconstructs the dependency subtree even during a no-op visual round trip." },
+    "formStudioPreservation": { "status": "pass", "reason": "Unchanged draft-07 dependency subtrees survive visual round trips without reconstruction." },
     "stapleDeployment": { "status": "pass", "reason": "The deployed RJSF stack supports the draft-07 keyword." }
   }
 }

@@ -27,8 +27,8 @@
   },
   "expectations": {
     "rjsfRendering": { "status": "pass", "reason": "RJSF renders scalar arrays." },
-    "formStudioAuthoring": { "status": "unsupported", "reason": "The generic array authoring control is currently disabled." },
-    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the scalar item schema and array constraints." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio provides a constrained string-array editor without allowing item-type conversion." },
+    "formStudioPreservation": { "status": "pass", "reason": "String item schemas and array constraints survive visual edits without information loss." },
     "stapleDeployment": { "status": "pass", "reason": "The research-data built-in contains an array of strings." }
   }
 }

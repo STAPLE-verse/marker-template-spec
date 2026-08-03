@@ -36,7 +36,7 @@ use:
 
 | Execution path | Version coordinates |
 | --- | --- |
-| MARKER Form Studio authoring and preview | Form Studio `0.1.0` at commit `d62d345e4d211b1093fc4f5d573430026957334e`, bundling RJSF and validator `6.6.2` with AJV `8.20.0` |
+| MARKER Form Studio authoring and preview | Form Studio `0.1.0` at commit `251056e81dcd8dad7b541ad91e6978003ccea0db`, bundling RJSF and validator `6.6.2` with AJV `8.20.0` |
 | STAPLE Form Studio authoring and preview | The same Form Studio build and bundled validation stack |
 | STAPLE deployed metadata collection | RJSF and validator `5.13.4`, AJV `8.17.1`, and `ajv-formats` `2.1.1` |
 

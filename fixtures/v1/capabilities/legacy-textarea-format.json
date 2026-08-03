@@ -15,8 +15,8 @@
   },
   "expectations": {
     "rjsfRendering": { "status": "pass", "reason": "Current RJSF selects its textarea widget even though AJV treats the format as unknown." },
-    "formStudioAuthoring": { "status": "lossy", "reason": "Studio classifies the field as a short answer." },
-    "formStudioPreservation": { "status": "pass", "reason": "The current no-op round trip retains the legacy textarea format even though the visual classification is unsafe." },
+    "formStudioAuthoring": { "status": "unsupported", "reason": "Studio preserves the legacy field, reports the exact schema/UI-schema migration, and disables unsafe visual editing." },
+    "formStudioPreservation": { "status": "pass", "reason": "No-op and unrelated visual edits retain the legacy textarea schema and UI entries unchanged." },
     "stapleDeployment": { "status": "pass", "reason": "Current STAPLE RJSF 5 selects a textarea, although the format remains non-standard." }
   }
 }
