@@ -24,6 +24,6 @@
   "expectations": {
     "rjsfRendering": { "status": "pass", "reason": "RJSF supports local JSON Pointer references." },
     "formStudioAuthoring": { "status": "pass", "reason": "Studio supports local references under definitions." },
-    "stapleDeployment": { "status": "blocked", "reason": "Current preprocessing removes $id and $ref before rendering." }
+    "stapleDeployment": { "status": "pass", "reason": "STAPLE preserves local references and enforces their referenced constraints during deployment." }
   }
 }
