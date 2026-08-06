@@ -1,0 +1,70 @@
+{
+  "id": "direct-orcid-iri",
+  "description": "Project a stored absolute ORCID value as an identified RDF node.",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:10000000-0000-4000-8000-000000000003",
+      "versionId": "urn:uuid:20000000-0000-4000-8000-000000000003",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Direct ORCID IRI example",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "contributorOrcid": {
+            "type": "string",
+            "format": "uri",
+            "title": "Contributor ORCID"
+          }
+        },
+        "required": ["contributorOrcid"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": {
+        "classIri": "https://schema.org/ResearchProject"
+      },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/contributorOrcid",
+          "predicate": "https://schema.org/contributor",
+          "valueKind": "iri"
+        }
+      ]
+    }
+  },
+  "response": {
+    "contributorOrcid": "https://orcid.org/0000-0002-1825-0097"
+  },
+  "projectionInput": {
+    "rootInstanceIri": "urn:uuid:30000000-0000-4000-8000-000000000003"
+  },
+  "expectedExpandedJsonLd": [
+    {
+      "@id": "urn:uuid:30000000-0000-4000-8000-000000000003",
+      "@type": ["https://schema.org/ResearchProject"],
+      "https://schema.org/contributor": [
+        {
+          "@id": "https://orcid.org/0000-0002-1825-0097"
+        }
+      ]
+    }
+  ],
+  "expectedDiagnostics": {
+    "coreValidation": [],
+    "instanceValidation": [],
+    "semanticValidation": [],
+    "projection": []
+  }
+}

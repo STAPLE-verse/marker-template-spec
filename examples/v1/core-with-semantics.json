@@ -1,0 +1,29 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1",
+    "https://staplescience.com/profiles/marker-template/semantic/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:e7a99bd9-29cc-4791-83fa-9d762775155a",
+    "versionId": "urn:uuid:2ada570e-ae0c-4f85-87fd-aa6f64d97857",
+    "version": "draft-2",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Core package with opaque draft semantics",
+    "createdAt": "2026-08-01T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "uiSchema": {}
+  },
+  "semantics": {}
+}

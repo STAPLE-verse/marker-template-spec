@@ -5,4 +5,25 @@ documented here.
 
 ## Unreleased
 
-- Initialized the non-normative specification repository scaffold.
+- Froze the normative Core V1 profile and package-schema identifiers under
+  `staplescience.com`.
+- Defined the `conformsTo`, `metadata`, `form`, and optional `semantics`
+  package vocabulary, draft and published metadata, draft-07 form dialect,
+  JSON Pointer field addressing, and staged conformance model.
+- Unified creator and contributor credit in one contributor list, with the
+  reserved `Creator` role and optional identifiers and affiliations.
+- Added the normative package schema, valid and invalid fixtures, stable
+  diagnostics, semantic dispatch checks, and application compatibility
+  evidence.
+- Added the lean Semantic V1 profile covering local-reference field resolution,
+  explicit node ownership, literal defaults, offline expanded JSON-LD
+  projection, and the boundary of deferred semantic features.
+- Added five complete, non-normative Semantic V1 design examples covering a
+  title literal, default date datatype, direct ORCID IRI, exact local mapping,
+  and repeated contributor nodes resolved through a local reference.
+- Added the normative Semantic V1 component JSON Schema with closed,
+  discriminated `literal`, `iri`, and `node` binding shapes and validated all
+  five design examples against it.
+- Added executable Semantic V1 cross-component validation and stable
+  diagnostics for IRIs, field resolution, effective types, exact mappings, and
+  node ownership.

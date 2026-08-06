@@ -1,0 +1,5 @@
+{
+  "stage": "core-profile",
+  "code": "CORE_UNSUPPORTED_FORMAT",
+  "pointer": "/form/schema/properties/description/format"
+}

@@ -1,0 +1,38 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:4bd4ef54-eabf-4f2f-a74e-b7461e7ab881",
+    "versionId": "urn:uuid:977e42eb-a746-4f1e-b68d-f5102955e957",
+    "version": "1.0.0",
+    "status": "published",
+    "resourceType": "MetadataTemplate",
+    "title": "Missing creator credit",
+    "description": "A published package must credit at least one contributor as a creator.",
+    "language": "en",
+    "contributors": [
+      {
+        "name": "Example Editor",
+        "roles": ["Editor"]
+      }
+    ],
+    "publisher": {
+      "name": "Staple Science"
+    },
+    "license": {
+      "identifier": "CC-BY-4.0"
+    },
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T09:00:00Z",
+    "publishedAt": "2026-08-05T09:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {}
+    },
+    "uiSchema": {}
+  }
+}

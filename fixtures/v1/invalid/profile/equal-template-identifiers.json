@@ -1,0 +1,23 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:ace42920-141a-4347-b2d4-00fd236214c9",
+    "versionId": "urn:uuid:ace42920-141a-4347-b2d4-00fd236214c9",
+    "version": "draft-1",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Ambiguous identity",
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {}
+    },
+    "uiSchema": {}
+  }
+}

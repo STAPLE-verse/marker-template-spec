@@ -1,5 +1,7 @@
 # V1 examples
 
-Examples explain how to use the specification but are non-normative. Each
-example must state which conformance class it demonstrates and should also pass
-the normative validator once that validator exists.
+`core-with-semantics.json` demonstrates the reserved Semantic V1 boundary and
+separate validator dispatch. Its empty payload is intentionally opaque to Core
+and does not claim Semantic V1 conformance or define the binding contract. The
+non-normative scope is recorded in the
+[Semantic V1 scope draft](../../spec/semantic/v1/README.md).

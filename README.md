@@ -6,70 +6,73 @@ fixtures, and examples.
 
 ## Status
 
-The specification is an early draft. It is not normative and must not yet be
-used as a stable interoperability contract.
+Core V1 is normative. Its profile URI, package-schema `$id`, package property
+names, embedded form dialect, lifecycle metadata, field-addressing rules, and
+semantic boundary are frozen in [`spec/v1/README.md`](spec/v1/README.md).
 
-Before Core V1 can become normative, the project must freeze:
-
-- the canonical specification URI;
-- the MARKER Template Document Schema `$id`;
-- the document property names and lifecycle-specific metadata requirements;
-- the supported form JSON Schema and RJSF `uiSchema` profiles; and
-- the conformance fixtures and expected diagnostics.
-
-No `example.org` identifier may be persisted or published as a canonical
-identifier.
+Semantic V1's component vocabulary, JSON Schema, cross-component validation,
+and validation diagnostics are normative, while its projection contract and
+projection diagnostics remain draft.
+Core reserves `/semantics` and dispatches it separately. The processing model,
+field resolution, node ownership, literal defaults, and deferred features are
+recorded in the [`Semantic V1 scope draft`](spec/semantic/v1/README.md).
 
 ## Repository contents
 
 ```text
-spec/       Human-readable specification
-schemas/    Machine-readable schemas
-fixtures/   Valid and invalid conformance fixtures
+spec/       Human-readable normative specification
+schemas/    Machine-readable normative schemas
+fixtures/   Valid, invalid, and application-capability fixtures
 examples/   Explanatory, non-normative examples
-scripts/    Repository validation used by CI
-tests/      Non-JSON-Schema conformance checks
+scripts/    Staged conformance validation used by CI
+tests/      Profile and cross-component conformance checks
 ```
 
 The normative specification and schemas define the contract. Repository tests
 check that the maintained artifacts implement that contract, but do not add
 requirements of their own.
 
+## Stable identifiers
+
+- Profile: `https://staplescience.com/profiles/marker-template/core/v1`
+- Package schema: `https://staplescience.com/schemas/marker-template/core/v1/package.schema.json`
+- Form-schema dialect: `http://json-schema.org/draft-07/schema#`
+- Semantic profile: `https://staplescience.com/profiles/marker-template/semantic/v1`
+- Semantic component schema: `https://staplescience.com/schemas/marker-template/semantic/v1/semantics.schema.json`
+
 ## Distribution
 
 This repository is not an npm package and does not distribute a runtime
-validation library. Released specifications and schemas will be published as
-versioned, implementation-independent files. MARKER, STAPLE, and third-party
-consumers can validate documents with a JSON Schema implementation appropriate
-to their language or framework.
+validation library. Released specifications and schemas are versioned,
+implementation-independent files. MARKER, STAPLE, and third-party consumers
+can validate documents with an appropriate JSON Schema implementation.
 
-The root `package.json` exists only to provide reproducible development and CI
-commands.
+Ajv and the scripts in this repository are reference conformance tooling, not
+runtime requirements for consumers.
 
 ## Validation
 
-The repository uses two validation layers:
-
-1. `npm run validate:schema` checks that schemas are valid JSON Schema 2020-12
-   documents, valid fixtures pass, invalid fixtures fail, and JSON examples
-   pass.
-2. `npm run validate:rules` checks profile rules that cannot be expressed
-   reliably in JSON Schema, such as cross-component references and application
-   compatibility.
-
-Ajv is an implementation detail of this repository's CI. Consumers are not
-required to use Ajv or JavaScript.
-
-## Development
+Run the complete repository suite with Node.js 20 or newer:
 
 ```bash
 npm ci
 npm run check
 ```
 
-Node.js 20 or newer is required.
+`validate:schema` checks the normative JSON Schema artifacts. `validate:rules`
+checks valid and invalid packages, the Core subset, cross-component references,
+field pointers, semantic dispatch and component shape, diagnostic contracts,
+design examples, and capability fixtures.
+
+Application compatibility is versioned evidence and is run in the consumer
+repositories:
+
+```bash
+cd ../form-studio && npm test
+cd ../STAPLE && npm run test:marker-template-capabilities
+```
 
 ## Licensing
 
-The licenses for the normative specification, schemas, fixtures, and
-repository validation code must be selected before the first public release.
+The repository's public-release license must be selected before distributing a
+tagged release. That administrative choice does not alter Core V1 conformance.

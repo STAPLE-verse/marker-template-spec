@@ -1,32 +1,20 @@
 # V1 conformance fixtures
 
-Fixtures will be organized by validation stage and expected result:
+Fixtures are organized by validation stage and expected result:
 
 ```text
-capabilities/          Non-normative probes for candidate form capabilities
-valid/                 Documents expected to conform
-invalid/package/       Outer document failures
-invalid/components/    Form schema or UI schema failures
-invalid/cross/         Cross-component integrity failures
-invalid/rjsf/          RJSF compatibility failures
-invalid/form-studio/   Form Studio round-trip failures
+capabilities/          Versioned application capability probes
+valid/                 Core V1 conforming packages
+invalid/package/       Outer-package failures
+invalid/components/    Invalid dialect or JSON Schema failures
+invalid/profile/       Unsupported Core form-profile constructs
+invalid/cross/         Form schema / UI schema integrity failures
 ```
 
-Every invalid fixture must declare its expected diagnostic code and JSON
-location. Fixtures are part of the conformance contract once V1 becomes
-normative.
+Every invalid package has a sibling `.expected.json` file declaring the stage,
+stable diagnostic code, and RFC 6901 package pointer of its first expected
+diagnostic. The conformance tests execute the stages in the order defined by
+the normative specification.
 
-JSON Schema fixtures use the following convention:
-
-- `valid/**/*.json` must validate against
-  `schemas/v1/marker-template.schema.json`;
-- `invalid/**/*.json` must fail validation against that schema; and
-- files ending in `.expected.json` contain expected diagnostics and are not
-  treated as template documents.
-
-Rules that require relationships between components or application-specific
-compatibility checks belong in `tests/conformance/`.
-
-Capability fixtures are deliberately outside `valid/` and `invalid/` until
-Core V1 is frozen. They describe and test current software behavior without
-making a normative conformance decision.
+Capability fixtures retain focused application-version evidence. They are not
+outer packages and are not independently claims of Core conformance.

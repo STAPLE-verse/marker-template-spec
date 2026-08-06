@@ -1,0 +1,31 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:0d71cadd-cf4e-45a7-9012-6943e37658fe",
+    "versionId": "urn:uuid:89d48010-88f3-4c97-a65c-84a8ef957fba",
+    "version": "draft-1",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Minimal title form",
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title",
+          "minLength": 1
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false
+    },
+    "uiSchema": {}
+  }
+}

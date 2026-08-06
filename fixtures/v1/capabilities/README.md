@@ -36,7 +36,7 @@ use:
 
 | Execution path | Version coordinates |
 | --- | --- |
-| MARKER Form Studio authoring and preview | Form Studio `0.1.0` at commit `251056e81dcd8dad7b541ad91e6978003ccea0db`, bundling RJSF and validator `6.6.2` with AJV `8.20.0` |
+| MARKER Form Studio authoring and preview | Form Studio `0.1.0` at commit `ed38931ccc5ba1b5a6a6c0fcf7b574e3a1dcc405`, bundling RJSF and validator `6.6.2` with AJV `8.20.0` |
 | STAPLE Form Studio authoring and preview | The same Form Studio build and bundled validation stack |
 | STAPLE deployed metadata collection | RJSF and validator `5.13.4`, AJV `8.17.1`, and `ajv-formats` `2.1.1` |
 
@@ -61,6 +61,11 @@ Both consumers read this directory through `MARKER_TEMPLATE_SPEC_ROOT`. Local
 development falls back to a sibling `marker-template-spec` checkout. Cross-repository
 CI wiring is deferred until the V1 fixture suite has a commit or release that
 the consuming application can pin explicitly.
+
+The matrix was reverified on 2026-08-05: Form Studio passed 65 compatibility
+tests and STAPLE passed all 16 capability fixtures. The reproducible commands
+are `npm test` in `form-studio` and
+`npm run test:marker-template-capabilities` in `STAPLE`.
 
 Initial fixtures:
 

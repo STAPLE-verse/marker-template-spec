@@ -1,15 +1,18 @@
-# Non-schema conformance tests
+# Core V1 conformance tests
 
-This directory contains executable checks for normative profile requirements
-that cannot be represented reliably by the MARKER JSON Schemas.
+The suite implements the normative validation stages that are not expressible
+solely by the outer package schema:
 
-Expected examples include:
+- draft-07 validation of `/form/schema`;
+- the supported form keyword, format, reference, and array subset;
+- UI-schema references and order integrity;
+- lifecycle identity and timestamp rules;
+- RFC 6901 field-address validation; and
+- separate Semantic V1 dispatch;
+- Semantic V1 component-shape validation; and
+- Semantic V1 field resolution, binding compatibility, exact mapping, and node
+  ownership rules.
 
-- `uiSchema` references point to fields defined by `form.schema`;
-- semantic bindings target existing template fields;
-- the form schema uses only the supported RJSF profile; and
-- a template survives the defined Form Studio round trip.
-
-Each test must cite the specification requirement it implements. A test is an
-implementation of that written requirement; adding a test alone does not create
-a normative rule.
+Invalid fixtures fix the first expected diagnostic's `stage`, `code`, and
+package `pointer`. Capability tests retain the versioned evidence consumed by
+Form Studio and STAPLE.

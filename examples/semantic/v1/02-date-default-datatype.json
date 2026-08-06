@@ -1,0 +1,71 @@
+{
+  "id": "date-default-datatype",
+  "description": "Project a Core date field with the default XSD date datatype.",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:10000000-0000-4000-8000-000000000002",
+      "versionId": "urn:uuid:20000000-0000-4000-8000-000000000002",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Default date datatype example",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "title": "Start date"
+          }
+        },
+        "required": ["startDate"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": {
+        "classIri": "https://schema.org/ResearchProject"
+      },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/startDate",
+          "predicate": "https://schema.org/startDate",
+          "valueKind": "literal"
+        }
+      ]
+    }
+  },
+  "response": {
+    "startDate": "2026-09-15"
+  },
+  "projectionInput": {
+    "rootInstanceIri": "urn:uuid:30000000-0000-4000-8000-000000000002"
+  },
+  "expectedExpandedJsonLd": [
+    {
+      "@id": "urn:uuid:30000000-0000-4000-8000-000000000002",
+      "@type": ["https://schema.org/ResearchProject"],
+      "https://schema.org/startDate": [
+        {
+          "@value": "2026-09-15",
+          "@type": "http://www.w3.org/2001/XMLSchema#date"
+        }
+      ]
+    }
+  ],
+  "expectedDiagnostics": {
+    "coreValidation": [],
+    "instanceValidation": [],
+    "semanticValidation": [],
+    "projection": []
+  }
+}

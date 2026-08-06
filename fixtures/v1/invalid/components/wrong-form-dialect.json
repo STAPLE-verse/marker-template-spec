@@ -1,0 +1,23 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:c75e237a-c2e1-419d-ac34-4a765bfc7399",
+    "versionId": "urn:uuid:5a7961a6-4bf0-4f95-a2d1-0e1fa7888f4e",
+    "version": "draft-1",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Wrong dialect",
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {}
+    },
+    "uiSchema": {}
+  }
+}

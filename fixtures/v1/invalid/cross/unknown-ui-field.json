@@ -1,0 +1,31 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:6d98933d-e34a-437b-a944-0d5b3a482aaf",
+    "versionId": "urn:uuid:4f1b6af6-9ced-4c44-b23a-2e85f486ca96",
+    "version": "draft-1",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Dangling UI field",
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "uiSchema": {
+      "deletedField": {
+        "ui:widget": "textarea"
+      }
+    }
+  }
+}

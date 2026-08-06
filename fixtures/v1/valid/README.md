@@ -1,4 +1,8 @@
 # Valid V1 fixtures
 
-Add one minimal document for each supported capability. Keep fixtures focused
-so a failure identifies one contract rule.
+- `minimal-draft.json` fixes the minimum draft metadata and simplest form.
+- `published-research-data.json` covers published contributor credit,
+  identifiers, affiliations, licensing, nesting, arrays, local references,
+  conditional fields, and UI cross-references.
+
+Both packages MUST pass every Core V1 conformance stage.

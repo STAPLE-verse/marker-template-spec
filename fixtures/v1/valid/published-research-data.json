@@ -1,0 +1,143 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "https://staplescience.com/templates/families/research-data",
+    "versionId": "https://staplescience.com/templates/research-data/versions/1.0.0",
+    "version": "1.0.0",
+    "status": "published",
+    "resourceType": "MetadataTemplate",
+    "title": "Research data description",
+    "description": "Collects a title, contact, contributors, and access conditions.",
+    "language": "en",
+    "contributors": [
+      {
+        "name": "Example Researcher",
+        "nameType": "Personal",
+        "roles": ["Creator"],
+        "identifiers": [
+          {
+            "value": "https://orcid.org/0000-0002-1825-0097",
+            "scheme": "ORCID"
+          }
+        ],
+        "affiliations": [
+          {
+            "name": "Example University",
+            "identifier": "https://ror.org/00tjv0s33",
+            "identifierScheme": "ROR"
+          }
+        ]
+      },
+      {
+        "name": "Metadata Working Group",
+        "nameType": "Organizational",
+        "roles": ["Editor"]
+      }
+    ],
+    "publisher": {
+      "name": "Staple Science"
+    },
+    "license": {
+      "identifier": "CC-BY-4.0",
+      "uri": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "keywords": ["research data", "metadata"],
+    "domain": "Research data management",
+    "createdAt": "2026-07-01T09:00:00Z",
+    "updatedAt": "2026-08-05T09:30:00Z",
+    "publishedAt": "2026-08-05T10:00:00Z",
+    "releaseNotes": "Initial public release."
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://staplescience.com/templates/research-data/versions/1.0.0/form.schema.json",
+      "type": "object",
+      "definitions": {
+        "nonEmptyString": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "properties": {
+        "title": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "required": ["name", "email"],
+          "additionalProperties": false
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "orcid": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+          }
+        },
+        "access": {
+          "type": "string",
+          "enum": ["open", "restricted"]
+        }
+      },
+      "required": ["title", "contact", "access"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "access": {
+                "const": "restricted"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "restrictionReason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["restrictionReason"]
+          }
+        }
+      ]
+    },
+    "uiSchema": {
+      "ui:order": ["title", "contact", "contributors", "access", "restrictionReason"],
+      "contact": {
+        "ui:order": ["name", "email"]
+      },
+      "contributors": {
+        "items": {
+          "ui:order": ["name", "orcid"]
+        }
+      },
+      "restrictionReason": {
+        "ui:widget": "textarea",
+        "ui:placeholder": "Explain why access is restricted"
+      }
+    }
+  }
+}

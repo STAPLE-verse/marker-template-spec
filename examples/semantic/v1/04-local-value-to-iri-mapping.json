@@ -1,0 +1,80 @@
+{
+  "id": "local-value-to-iri-mapping",
+  "description": "Project an exact local string value through a local value-to-IRI mapping.",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:10000000-0000-4000-8000-000000000004",
+      "versionId": "urn:uuid:20000000-0000-4000-8000-000000000004",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Local value-to-IRI mapping example",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "responsibleAgentType": {
+            "type": "string",
+            "title": "Responsible agent type",
+            "enum": ["person", "organization"]
+          }
+        },
+        "required": ["responsibleAgentType"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": {
+        "classIri": "https://schema.org/ResearchProject"
+      },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/responsibleAgentType",
+          "predicate": "https://schema.org/additionalType",
+          "valueKind": "iri",
+          "valueMappings": [
+            {
+              "value": "person",
+              "iri": "https://schema.org/Person"
+            },
+            {
+              "value": "organization",
+              "iri": "https://schema.org/Organization"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "responsibleAgentType": "person"
+  },
+  "projectionInput": {
+    "rootInstanceIri": "urn:uuid:30000000-0000-4000-8000-000000000004"
+  },
+  "expectedExpandedJsonLd": [
+    {
+      "@id": "urn:uuid:30000000-0000-4000-8000-000000000004",
+      "@type": ["https://schema.org/ResearchProject"],
+      "https://schema.org/additionalType": [
+        {
+          "@id": "https://schema.org/Person"
+        }
+      ]
+    }
+  ],
+  "expectedDiagnostics": {
+    "coreValidation": [],
+    "instanceValidation": [],
+    "semanticValidation": [],
+    "projection": []
+  }
+}

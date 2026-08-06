@@ -1,0 +1,142 @@
+{
+  "id": "repeated-contributors-local-ref",
+  "description": "Project repeated contributor objects through a local reference and explicit node ownership.",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:10000000-0000-4000-8000-000000000005",
+      "versionId": "urn:uuid:20000000-0000-4000-8000-000000000005",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Repeated contributors through local reference",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "definitions": {
+          "contributor": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "orcid": {
+                "type": "string",
+                "format": "uri",
+                "title": "ORCID"
+              }
+            },
+            "required": ["name", "orcid"]
+          }
+        },
+        "properties": {
+          "contributors": {
+            "type": "array",
+            "title": "Contributors",
+            "items": {
+              "$ref": "#/definitions/contributor"
+            }
+          }
+        },
+        "required": ["contributors"]
+      },
+      "uiSchema": {
+        "contributors": {
+          "items": {
+            "ui:order": ["name", "orcid"]
+          }
+        }
+      }
+    },
+    "semantics": {
+      "root": {
+        "classIri": "https://schema.org/ResearchProject"
+      },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/contributors",
+          "predicate": "https://schema.org/contributor",
+          "valueKind": "node",
+          "classIri": "https://schema.org/Person"
+        },
+        {
+          "fieldPointer": "/properties/contributors/items/properties/name",
+          "parentNodePointer": "/properties/contributors",
+          "predicate": "https://schema.org/name",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/contributors/items/properties/orcid",
+          "parentNodePointer": "/properties/contributors",
+          "predicate": "https://schema.org/identifier",
+          "valueKind": "iri"
+        }
+      ]
+    }
+  },
+  "response": {
+    "contributors": [
+      {
+        "name": "Ada Lovelace",
+        "orcid": "https://orcid.org/0000-0002-1825-0097"
+      },
+      {
+        "name": "Grace Hopper",
+        "orcid": "https://orcid.org/0000-0003-1419-2405"
+      }
+    ]
+  },
+  "projectionInput": {
+    "rootInstanceIri": "urn:uuid:30000000-0000-4000-8000-000000000005"
+  },
+  "expectedExpandedJsonLd": [
+    {
+      "@id": "urn:uuid:30000000-0000-4000-8000-000000000005",
+      "@type": ["https://schema.org/ResearchProject"],
+      "https://schema.org/contributor": [
+        {
+          "@type": ["https://schema.org/Person"],
+          "https://schema.org/name": [
+            {
+              "@value": "Ada Lovelace",
+              "@type": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          ],
+          "https://schema.org/identifier": [
+            {
+              "@id": "https://orcid.org/0000-0002-1825-0097"
+            }
+          ]
+        },
+        {
+          "@type": ["https://schema.org/Person"],
+          "https://schema.org/name": [
+            {
+              "@value": "Grace Hopper",
+              "@type": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          ],
+          "https://schema.org/identifier": [
+            {
+              "@id": "https://orcid.org/0000-0003-1419-2405"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expectedDiagnostics": {
+    "coreValidation": [],
+    "instanceValidation": [],
+    "semanticValidation": [],
+    "projection": []
+  }
+}

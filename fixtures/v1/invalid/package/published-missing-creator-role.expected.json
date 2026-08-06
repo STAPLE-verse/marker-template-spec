@@ -1,0 +1,5 @@
+{
+  "stage": "package",
+  "code": "PACKAGE_SCHEMA_INVALID",
+  "pointer": "/metadata/contributors/0/roles/0"
+}

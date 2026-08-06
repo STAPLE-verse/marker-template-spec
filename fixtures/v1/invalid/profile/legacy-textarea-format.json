@@ -1,0 +1,28 @@
+{
+  "conformsTo": [
+    "https://staplescience.com/profiles/marker-template/core/v1"
+  ],
+  "metadata": {
+    "familyId": "urn:uuid:a1bc7bc0-bc46-4802-a1cc-bb8856da878d",
+    "versionId": "urn:uuid:6c61f58d-dd48-420c-9e4e-fb5d54e86e35",
+    "version": "draft-1",
+    "status": "draft",
+    "resourceType": "MetadataTemplate",
+    "title": "Legacy textarea",
+    "createdAt": "2026-08-05T08:00:00Z",
+    "updatedAt": "2026-08-05T08:00:00Z"
+  },
+  "form": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "format": "textarea"
+        }
+      }
+    },
+    "uiSchema": {}
+  }
+}

@@ -1,14 +1,18 @@
 # V1 machine-readable schemas
 
-This directory is reserved for the schemas that implement the normative V1
-contract, including the MARKER Template Document Schema and supporting
-component schemas.
+`marker-template.schema.json` is the normative MARKER Core V1 outer-package
+schema. Its dialect is JSON Schema 2020-12 and its stable `$id` is:
 
-No schema is committed yet because the canonical `$id`, package vocabulary,
-metadata requirements, and dialect decisions are still open. Draft schemas
-must be clearly marked non-normative and must not use a placeholder as a
-published identifier.
+```text
+https://staplescience.com/schemas/marker-template/core/v1/package.schema.json
+```
 
-The root V1 schema will be named `marker-template.schema.json` and will declare
-the JSON Schema 2020-12 dialect. Supporting schemas may be added beside it and
-referenced with `$ref`.
+Package instances declare Core conformance through `/conformsTo`; they do not
+repeat the validator `$id` in a top-level `$schema` property. The embedded
+`/form/schema` is deliberately validated in a separate pass as
+JSON Schema draft-07. The outer schema only establishes its canonical location
+and JSON object shape; it does not reinterpret it as a 2020-12 subschema.
+
+The separately dispatched Semantic V1 component schema is documented at
+[`schemas/semantic/v1/`](../semantic/v1/README.md). The Core package schema does
+not reference or inline that independent profile schema.

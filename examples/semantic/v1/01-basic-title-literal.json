@@ -1,0 +1,67 @@
+{
+  "id": "basic-title-literal",
+  "description": "Project a string title as an RDF literal from a blank root node.",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:10000000-0000-4000-8000-000000000001",
+      "versionId": "urn:uuid:20000000-0000-4000-8000-000000000001",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Basic title literal example",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Project title"
+          }
+        },
+        "required": ["title"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": {
+        "classIri": "https://schema.org/ResearchProject"
+      },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/title",
+          "predicate": "http://purl.org/dc/terms/title",
+          "valueKind": "literal"
+        }
+      ]
+    }
+  },
+  "response": {
+    "title": "Multilingual metadata practices"
+  },
+  "projectionInput": {},
+  "expectedExpandedJsonLd": [
+    {
+      "@type": ["https://schema.org/ResearchProject"],
+      "http://purl.org/dc/terms/title": [
+        {
+          "@value": "Multilingual metadata practices",
+          "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+      ]
+    }
+  ],
+  "expectedDiagnostics": {
+    "coreValidation": [],
+    "instanceValidation": [],
+    "semanticValidation": [],
+    "projection": []
+  }
+}

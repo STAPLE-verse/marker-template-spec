@@ -1,0 +1,5 @@
+{
+  "stage": "form-schema",
+  "code": "FORM_SCHEMA_DIALECT",
+  "pointer": "/form/schema/$schema"
+}
