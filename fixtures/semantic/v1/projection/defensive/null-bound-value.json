@@ -1,0 +1,48 @@
+{
+  "id": "semantic-projection-defensive-null-bound-value",
+  "description": "Defensively omit null for a bound scalar even though the response is not Core-conformant.",
+  "conformance": "defensive",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000006",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000006",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Defensive null omission fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "note": { "type": "string" }
+        }
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": { "classIri": "https://schema.org/Thing" },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/note",
+          "predicate": "https://schema.org/description",
+          "valueKind": "literal"
+        }
+      ]
+    }
+  },
+  "response": { "note": null },
+  "projectionInput": {},
+  "responseConformsToFormSchema": false,
+  "expectedExpandedJsonLd": [
+    { "@type": ["https://schema.org/Thing"] }
+  ],
+  "expectedProjectionDiagnostics": []
+}

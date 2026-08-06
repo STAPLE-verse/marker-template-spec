@@ -1,8 +1,8 @@
 # Semantic V1 design examples
 
-> **Status:** Non-normative design examples. These files exercise the lean
-> Semantic V1 component schema and cross-component validator before the
-> reference projector is normative.
+> **Status:** Non-normative explanatory examples with normative expected
+> projection results. These files exercise the Semantic V1 component schema,
+> cross-component validator, and reference projector.
 
 Each JSON file is one complete projection scenario containing:
 
@@ -29,8 +29,8 @@ The five examples exercise this normative component vocabulary:
 The normative component shape is defined by
 [`semantics.schema.json`](../../../schemas/semantic/v1/semantics.schema.json),
 not by these examples. Cross-component diagnostics are executed by the
-reference Semantic V1 validator. Expected projection diagnostics still express
-intended behavior; no reference projector exists yet.
+reference Semantic V1 validator, and expected expanded JSON-LD is executed by
+the reference projector.
 
 ## Scenarios
 
@@ -43,7 +43,6 @@ intended behavior; no reference projector exists yet.
    `$ref`, `node`, nested `literal` and `iri` bindings, and
    `parentNodePointer`.
 
-Template-version provenance is intentionally absent from the field-derived
-graphs. The specification must decide whether the exact template `versionId`
-is emitted on the root node or recorded in a separate instance/export envelope
-before the reference projector contract is frozen.
+Template metadata is intentionally absent from the field-derived graphs. The
+collecting application keeps every response associated with the exact Core V1
+package, whose `metadata.versionId` identifies the template version.

@@ -284,7 +284,7 @@ function inferSchemaType(schema) {
   return undefined
 }
 
-function isAbsoluteIri(value) {
+export function isSemanticAbsoluteIri(value) {
   if (typeof value !== "string" || !/^[A-Za-z][A-Za-z0-9+.-]*:/u.test(value)) {
     return false
   }
@@ -309,7 +309,7 @@ function isLanguageTag(value) {
   }
 }
 
-function scalarKey(value) {
+export function semanticScalarKey(value) {
   if (typeof value === "number") return `number:${Object.is(value, -0) ? 0 : value}`
   return `${typeof value}:${String(value)}`
 }
@@ -320,7 +320,7 @@ function scalarMatchesType(value, type) {
   return typeof value === type
 }
 
-function defaultDatatype(schema) {
+export function semanticDefaultDatatype(schema) {
   if (schema.type === "string") {
     if (schema.format === "date") return `${XSD}date`
     if (schema.format === "date-time") return `${XSD}dateTime`
@@ -339,7 +339,7 @@ function bindingPointer(index, property = undefined) {
 }
 
 function validateIris(semantics, diagnostics) {
-  if (semantics.root && !isAbsoluteIri(semantics.root.classIri)) {
+  if (semantics.root && !isSemanticAbsoluteIri(semantics.root.classIri)) {
     diagnostics.push(
       diagnostic(
         "SEMANTIC_IRI_INVALID",
@@ -351,7 +351,10 @@ function validateIris(semantics, diagnostics) {
 
   for (const [index, binding] of semantics.bindings.entries()) {
     for (const property of ["predicate", "datatypeIri", "classIri"]) {
-      if (binding[property] !== undefined && !isAbsoluteIri(binding[property])) {
+      if (
+        binding[property] !== undefined &&
+        !isSemanticAbsoluteIri(binding[property])
+      ) {
         diagnostics.push(
           diagnostic(
             "SEMANTIC_IRI_INVALID",
@@ -362,7 +365,7 @@ function validateIris(semantics, diagnostics) {
       }
     }
     for (const [mappingIndex, mapping] of (binding.valueMappings ?? []).entries()) {
-      if (!isAbsoluteIri(mapping.iri)) {
+      if (!isSemanticAbsoluteIri(mapping.iri)) {
         diagnostics.push(
           diagnostic(
             "SEMANTIC_IRI_INVALID",
@@ -446,7 +449,7 @@ function validateBindingCompatibility(binding, index, valueSchemas, diagnostics)
   if (binding.datatypeIri !== undefined) {
     const compatible = valueSchemas.every((schema) => {
       if (schema.type === "string" && schema.format === undefined) return true
-      return binding.datatypeIri === defaultDatatype(schema)
+      return binding.datatypeIri === semanticDefaultDatatype(schema)
     })
     if (!compatible) {
       diagnostics.push(
@@ -466,7 +469,7 @@ function validateValueMappings(binding, index, valueSchemas, diagnostics) {
   const mappingsPointer = bindingPointer(index, "valueMappings")
 
   for (const [mappingIndex, mapping] of binding.valueMappings.entries()) {
-    const key = scalarKey(mapping.value)
+    const key = semanticScalarKey(mapping.value)
     if (seen.has(key)) {
       diagnostics.push(
         diagnostic(
@@ -500,10 +503,10 @@ function validateValueMappings(binding, index, valueSchemas, diagnostics) {
 
   const allowed = new Map()
   for (const values of finiteValueSets) {
-    for (const value of values) allowed.set(scalarKey(value), value)
+    for (const value of values) allowed.set(semanticScalarKey(value), value)
   }
   for (const [mappingIndex, mapping] of binding.valueMappings.entries()) {
-    if (!allowed.has(scalarKey(mapping.value))) {
+    if (!allowed.has(semanticScalarKey(mapping.value))) {
       diagnostics.push(
         diagnostic(
           "SEMANTIC_MAPPING_VALUE_NOT_ALLOWED",
@@ -667,6 +670,31 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
   }
 }
 
+export function analyzeSemanticV1Bindings(document) {
+  const rootSchema = document?.form?.schema
+  const bindings = document?.semantics?.bindings
+  if (!rootSchema || typeof rootSchema !== "object" || !Array.isArray(bindings)) {
+    return []
+  }
+
+  return bindings.map((binding, index) => {
+    const resolution = resolveFieldPointer(rootSchema, binding.fieldPointer)
+    const values =
+      resolution.status === "resolved"
+        ? valueSchemasForField(resolution.schemas, rootSchema)
+        : { schemas: [], unsupported: true }
+    return {
+      index,
+      binding,
+      tokens: resolution.tokens,
+      resolutionStatus: resolution.status,
+      fieldSchemas: resolution.schemas,
+      valueSchemas: values.schemas,
+      unsupportedType: values.unsupported,
+    }
+  })
+}
+
 export function validateSemanticV1(document) {
   if (!document || typeof document !== "object" || document.semantics === undefined) {
     return []
@@ -691,14 +719,18 @@ export function validateSemanticV1(document) {
   validateIris(semantics, diagnostics)
 
   const resolved = []
-  for (const [index, binding] of semantics.bindings.entries()) {
-    const resolution = resolveFieldPointer(rootSchema, binding.fieldPointer)
-    resolved[index] = resolution
-    if (resolution.status !== "resolved") {
+  for (const analysis of analyzeSemanticV1Bindings(document)) {
+    const { binding, index } = analysis
+    resolved[index] = {
+      status: analysis.resolutionStatus,
+      schemas: analysis.fieldSchemas,
+      tokens: analysis.tokens,
+    }
+    if (analysis.resolutionStatus !== "resolved") {
       const code =
-        resolution.status === "invalid"
+        analysis.resolutionStatus === "invalid"
           ? "SEMANTIC_FIELD_POINTER_INVALID"
-          : resolution.status === "cycle"
+          : analysis.resolutionStatus === "cycle"
             ? "SEMANTIC_FIELD_POINTER_REF_CYCLE"
             : "SEMANTIC_FIELD_POINTER_UNRESOLVED"
       diagnostics.push(
@@ -711,8 +743,7 @@ export function validateSemanticV1(document) {
       continue
     }
 
-    const values = valueSchemasForField(resolution.schemas, rootSchema)
-    if (values.unsupported || values.schemas.length === 0) {
+    if (analysis.unsupportedType || analysis.valueSchemas.length === 0) {
       diagnostics.push(
         diagnostic(
           "SEMANTIC_FIELD_TYPE_UNRESOLVED",
@@ -722,8 +753,8 @@ export function validateSemanticV1(document) {
       )
       continue
     }
-    validateBindingCompatibility(binding, index, values.schemas, diagnostics)
-    validateValueMappings(binding, index, values.schemas, diagnostics)
+    validateBindingCompatibility(binding, index, analysis.valueSchemas, diagnostics)
+    validateValueMappings(binding, index, analysis.valueSchemas, diagnostics)
   }
 
   validateNodeOwnership(semantics.bindings, resolved, diagnostics)

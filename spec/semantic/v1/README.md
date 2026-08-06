@@ -1,10 +1,9 @@
 # MARKER Metadata Template Specification — Semantic V1 Scope
 
-> **Status:** Profile draft. This document defines the boundary, binding
-> vocabulary, component JSON Schema, cross-component validation rules, and
-> validation diagnostics of a lean Semantic V1 profile. The projection
-> algorithm, projection diagnostics, and projection conformance fixtures are
-> not yet normative.
+> **Status:** Complete profile draft. This document defines the boundary,
+> binding vocabulary, component JSON Schema, cross-component validation rules,
+> deterministic projection algorithm, and diagnostic contracts of a lean
+> Semantic V1 profile.
 
 Semantic V1 is an optional profile for attaching machine-interpretable meaning
 to fields in a Core V1 MARKER metadata-template package and deterministically
@@ -195,17 +194,94 @@ string values before matching. Consequently, `"1"` does not match `1`, and
 Mapping entries cannot target `null`, because missing values and `null` are
 omitted from projection.
 
-## Required template-version provenance decision
+## Normative projection algorithm
 
-Before the projection contract is frozen, the specification MUST decide how a
-metadata instance records the exact `metadata.versionId` of the template used
-to create it. The decision must state whether the Semantic V1 projector emits
-that relationship on the root instance node or whether a separate metadata-
-instance/export envelope records it outside the field-derived semantic graph.
+### Preconditions and result
 
-Template-version provenance is not an ordinary form response and MUST NOT be
-modeled as a field binding. Semantic V1 does not choose the relationship
-predicate or its location in this scope draft.
+Projection requires:
+
+1. a Core V1-conformant template package;
+2. a Semantic V1-valid `semantics` component;
+3. an object response that has already validated against `form.schema`; and
+4. an optional runtime `rootInstanceIri` that is an absolute IRI.
+
+For conforming input, the result is an expanded JSON-LD array containing one
+root node object. It contains no `@context`: predicates, classes, datatypes, and
+identified nodes use their full IRIs. Projection MUST NOT mutate the template
+or response.
+
+If `rootInstanceIri` is supplied, the root node receives it as `@id`. Otherwise
+the root is an unnamed blank node and the expanded object omits `@id`. If
+`semantics.root.classIri` is present, the root receives an `@type` array
+containing that class IRI.
+
+### Binding traversal
+
+Bindings are processed in their array order. A binding without
+`parentNodePointer` emits its predicate from the root node. A binding with
+`parentNodePointer` emits from each response object projected by that exact
+parent `node` binding.
+
+The projector translates the binding's schema field pointer into a response
+path:
+
+- each `properties/<name>` step reads the object property `<name>`; and
+- each `items` step visits every array member in response order.
+
+Local `$ref` traversal is completed during Semantic validation; `/definitions`
+never becomes part of the response path. For a child of an object-array node,
+the leading `items` step after the parent's field pointer addresses the current
+array member and is not traversed a second time. This preserves the association
+between every nested response object and its own child values.
+
+A missing property or `null` value emits nothing. Empty strings, `false`, and
+`0` are values and MUST be emitted. An empty array emits no value for its
+predicate. Scalar-array and object-array members are processed in response
+order, but that order has no RDF meaning in V1.
+
+### Value projection
+
+For each non-null value:
+
+- A `literal` binding emits a JSON-LD value object. It contains `@value` and
+  either `@language` or `@type`. A fixed language tag is normalized to
+  lowercase. Otherwise the explicit datatype is used, or the default datatype
+  is selected from the effective Core field type and format using the literal
+  table above.
+- A direct `iri` binding emits `{ "@id": value }` after confirming that the
+  response string is an absolute IRI.
+- A mapped `iri` binding performs exact JSON scalar matching and emits
+  `{ "@id": mappedIri }`. It never falls back to interpreting an unmapped value
+  as an IRI or literal.
+- A `node` binding emits one related blank node for an object, or one related
+  blank node for every object-array member. Its optional `classIri` becomes an
+  `@type` array. Its child bindings are then projected into that same node.
+
+When multiple bindings use the same predicate from the same subject, their
+values are appended to one predicate array in binding order. Nested blank nodes
+do not receive generated identifiers in V1.
+
+### Failure and determinism
+
+Projection is atomic. If any projection diagnostic is produced, no expanded
+JSON-LD result is returned; implementations MUST NOT return a silently partial
+graph. Response-value diagnostics use RFC 6901 pointers into the response.
+Runtime-option diagnostics use pointers into the projection options.
+
+For a fixed valid template, response, and root IRI, an implementation MUST
+produce the same RDF graph. The reference serialization additionally preserves
+binding order for properties and response-array order for values. Conformance
+comparison ignores JSON object-property order and implementation-assigned blank
+node labels.
+
+## Exact-template association boundary
+
+Every collected response MUST remain durably associated with the exact Core V1
+template package used to collect it. That package already supplies
+`metadata.versionId`. Semantic V1 therefore does not copy `versionId` into the
+response, add it to the field-derived JSON-LD graph, or define a metadata-
+instance envelope. Response storage and export packaging are responsibilities
+of the collecting application.
 
 ## Deferred beyond V1
 
@@ -273,9 +349,20 @@ codes for cross-component rules:
 | Exact mappings | `SEMANTIC_MAPPING_VALUE_DUPLICATE`, `SEMANTIC_MAPPING_VALUE_TYPE`, `SEMANTIC_MAPPING_VALUE_NOT_ALLOWED`, `SEMANTIC_MAPPING_ENUM_UNCOVERED` |
 | Node ownership | `SEMANTIC_PARENT_POINTER_INVALID`, `SEMANTIC_PARENT_REQUIRED`, `SEMANTIC_PARENT_NOT_FOUND`, `SEMANTIC_PARENT_AMBIGUOUS`, `SEMANTIC_PARENT_NOT_NODE`, `SEMANTIC_PARENT_OUTSIDE_NODE`, `SEMANTIC_PARENT_NOT_NEAREST`, `SEMANTIC_PARENT_SELF`, `SEMANTIC_PARENT_CYCLE` |
 
-Projection diagnostics will use a separate stage and are not defined yet.
+Projection uses the `semantic-projection` stage and these stable codes:
 
-## Normative validation and next milestone
+| Code | Meaning |
+| --- | --- |
+| `PROJECTION_PRECONDITION_FAILED` | The template or response does not meet the projection preconditions. |
+| `PROJECTION_ROOT_IRI_INVALID` | The supplied root instance IRI is not absolute. |
+| `PROJECTION_VALUE_TYPE_INVALID` | A bound response value has an incompatible runtime shape. |
+| `PROJECTION_LITERAL_DATATYPE_AMBIGUOUS` | No single deterministic default datatype can be selected. |
+| `PROJECTION_IRI_INVALID` | A direct IRI response value is not an absolute IRI. |
+| `PROJECTION_MAPPING_MISSING` | A mapped binding has no exact mapping for the response value. |
+
+Any projection diagnostic makes the projection result absent.
+
+## Normative artifacts
 
 The examples-first milestone established the binding vocabulary encoded by the
 normative [Semantic V1 component schema](../../../schemas/semantic/v1/semantics.schema.json).
@@ -291,9 +378,15 @@ local `$ref` traversal, effective field-type compatibility, exact mapping rules,
 and node ownership with stable diagnostics. Its behavior is exercised by the
 cross-component conformance tests.
 
-The next contract milestone is the reference projection algorithm. Before that
-contract is frozen, examples must cover number, boolean, `false`, `0`, empty-
-string, missing, and `null` behavior; scalar arrays; inline nested objects;
-invalid or unmapped response IRI values; and the template-version provenance
-decision above. Each projection example must include expected expanded JSON-LD
-and explicit edge-case behavior.
+The reference
+[Semantic V1 projector](../../../scripts/semantic-v1-projector.mjs) implements
+the algorithm above. The design examples fix complete expected expanded
+JSON-LD graphs, while the projector conformance tests cover number, boolean,
+`false`, `0`, empty-string, missing, and `null` behavior; scalar arrays; inline
+nested objects; fixed languages; explicit datatypes; invalid response IRIs;
+unmapped values; and atomic failure.
+
+The same edge cases are published as implementation-independent
+[portable projection fixtures](../../../fixtures/semantic/v1/README.md). The
+optional local `npm run validate:jsonld` command checks their expected and
+projected graphs with an independent JSON-LD 1.1 processor.

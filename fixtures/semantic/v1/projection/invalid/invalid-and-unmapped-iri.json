@@ -1,0 +1,74 @@
+{
+  "id": "semantic-projection-invalid-and-unmapped-iri",
+  "description": "Fail atomically when a direct IRI is invalid and an exact local mapping is missing.",
+  "conformance": "invalid",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000004",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000004",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Invalid IRI projection fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "identifier": { "type": "string" },
+          "category": { "type": "string" }
+        },
+        "required": ["identifier", "category"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "bindings": [
+        {
+          "fieldPointer": "/properties/identifier",
+          "predicate": "https://schema.org/sameAs",
+          "valueKind": "iri"
+        },
+        {
+          "fieldPointer": "/properties/category",
+          "predicate": "https://schema.org/additionalType",
+          "valueKind": "iri",
+          "valueMappings": [
+            {
+              "value": "known",
+              "iri": "https://example.org/categories/known"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "identifier": "not an IRI",
+    "category": "unknown"
+  },
+  "projectionInput": {},
+  "responseConformsToFormSchema": true,
+  "expectedExpandedJsonLd": null,
+  "expectedProjectionDiagnostics": [
+    {
+      "stage": "semantic-projection",
+      "code": "PROJECTION_IRI_INVALID",
+      "pointer": "/identifier",
+      "message": "A direct IRI binding requires an absolute response IRI"
+    },
+    {
+      "stage": "semantic-projection",
+      "code": "PROJECTION_MAPPING_MISSING",
+      "pointer": "/category",
+      "message": "No exact IRI mapping exists for \"unknown\""
+    }
+  ]
+}

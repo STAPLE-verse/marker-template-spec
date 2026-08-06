@@ -1,0 +1,98 @@
+{
+  "id": "semantic-projection-inline-nested-node",
+  "description": "Project an inline object as a related node with a literal name and repeated identified values.",
+  "conformance": "valid",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000002",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000002",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Inline nested node fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "contact": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "identifiers": {
+                "type": "array",
+                "items": { "type": "string", "format": "uri" }
+              }
+            },
+            "required": ["name", "identifiers"]
+          }
+        },
+        "required": ["contact"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "bindings": [
+        {
+          "fieldPointer": "/properties/contact",
+          "predicate": "https://schema.org/contactPoint",
+          "valueKind": "node",
+          "classIri": "https://schema.org/Person"
+        },
+        {
+          "fieldPointer": "/properties/contact/properties/name",
+          "parentNodePointer": "/properties/contact",
+          "predicate": "https://schema.org/name",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/contact/properties/identifiers",
+          "parentNodePointer": "/properties/contact",
+          "predicate": "https://schema.org/sameAs",
+          "valueKind": "iri"
+        }
+      ]
+    }
+  },
+  "response": {
+    "contact": {
+      "name": "Ada Lovelace",
+      "identifiers": [
+        "https://orcid.org/0000-0002-1825-0097",
+        "https://example.org/people/ada"
+      ]
+    }
+  },
+  "projectionInput": {
+    "rootInstanceIri": "https://example.org/records/1"
+  },
+  "responseConformsToFormSchema": true,
+  "expectedExpandedJsonLd": [
+    {
+      "@id": "https://example.org/records/1",
+      "https://schema.org/contactPoint": [
+        {
+          "@type": ["https://schema.org/Person"],
+          "https://schema.org/name": [
+            {
+              "@value": "Ada Lovelace",
+              "@type": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          ],
+          "https://schema.org/sameAs": [
+            { "@id": "https://orcid.org/0000-0002-1825-0097" },
+            { "@id": "https://example.org/people/ada" }
+          ]
+        }
+      ]
+    }
+  ],
+  "expectedProjectionDiagnostics": []
+}

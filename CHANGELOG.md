@@ -27,3 +27,8 @@ documented here.
 - Added executable Semantic V1 cross-component validation and stable
   diagnostics for IRIs, field resolution, effective types, exact mappings, and
   node ownership.
+- Added the normative, atomic response-to-expanded-JSON-LD algorithm and
+  reference projector, keeping exact-template association in the collecting
+  application rather than the semantic graph.
+- Added portable projection fixtures and an opt-in local JSON-LD 1.1/RDF graph
+  validation command backed by an independent processor.

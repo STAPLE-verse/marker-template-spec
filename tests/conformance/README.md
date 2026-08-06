@@ -11,8 +11,10 @@ solely by the outer package schema:
 - separate Semantic V1 dispatch;
 - Semantic V1 component-shape validation; and
 - Semantic V1 field resolution, binding compatibility, exact mapping, and node
-  ownership rules.
+  ownership rules; and
+- deterministic, atomic Semantic V1 expanded JSON-LD projection.
 
 Invalid fixtures fix the first expected diagnostic's `stage`, `code`, and
-package `pointer`. Capability tests retain the versioned evidence consumed by
-Form Studio and STAPLE.
+package `pointer`. Portable Semantic V1 fixtures fix complete projection inputs,
+expanded JSON-LD results, and diagnostics. Capability tests retain the
+versioned evidence consumed by Form Studio and STAPLE.

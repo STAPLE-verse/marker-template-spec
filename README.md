@@ -11,8 +11,7 @@ names, embedded form dialect, lifecycle metadata, field-addressing rules, and
 semantic boundary are frozen in [`spec/v1/README.md`](spec/v1/README.md).
 
 Semantic V1's component vocabulary, JSON Schema, cross-component validation,
-and validation diagnostics are normative, while its projection contract and
-projection diagnostics remain draft.
+expanded JSON-LD projection algorithm, and diagnostics are normative.
 Core reserves `/semantics` and dispatches it separately. The processing model,
 field resolution, node ownership, literal defaults, and deferred features are
 recorded in the [`Semantic V1 scope draft`](spec/semantic/v1/README.md).
@@ -63,6 +62,17 @@ npm run check
 checks valid and invalid packages, the Core subset, cross-component references,
 field pointers, semantic dispatch and component shape, diagnostic contracts,
 design examples, and capability fixtures.
+
+Run the independent JSON-LD 1.1 and RDF-graph check locally with:
+
+```bash
+npm run validate:jsonld
+```
+
+This command uses a separate standards implementation to expand and
+RDFC-1.0-canonicalize the expected and projected graphs without loading remote
+contexts. It is kept separate from the default validation command and CI
+workflow for now.
 
 Application compatibility is versioned evidence and is run in the consumer
 repositories:

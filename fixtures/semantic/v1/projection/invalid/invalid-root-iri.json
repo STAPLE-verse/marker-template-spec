@@ -1,0 +1,53 @@
+{
+  "id": "semantic-projection-invalid-root-iri",
+  "description": "Reject a relative runtime root instance identifier before projecting response fields.",
+  "conformance": "invalid",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000005",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000005",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Invalid root IRI fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" }
+        },
+        "required": ["title"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "bindings": [
+        {
+          "fieldPointer": "/properties/title",
+          "predicate": "https://schema.org/name",
+          "valueKind": "literal"
+        }
+      ]
+    }
+  },
+  "response": { "title": "Example" },
+  "projectionInput": { "rootInstanceIri": "/records/1" },
+  "responseConformsToFormSchema": true,
+  "expectedExpandedJsonLd": null,
+  "expectedProjectionDiagnostics": [
+    {
+      "stage": "semantic-projection",
+      "code": "PROJECTION_ROOT_IRI_INVALID",
+      "pointer": "/rootInstanceIri",
+      "message": "rootInstanceIri must be an absolute IRI"
+    }
+  ]
+}

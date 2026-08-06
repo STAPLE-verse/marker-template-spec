@@ -1,0 +1,114 @@
+{
+  "id": "semantic-projection-scalars-and-arrays",
+  "description": "Project scalar arrays and preserve empty strings, false, and zero while omitting missing values and empty arrays.",
+  "conformance": "valid",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000001",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000001",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Scalar and array projection fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "active": { "type": "boolean" },
+          "count": { "type": "integer" },
+          "scores": { "type": "array", "items": { "type": "number" } },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "omitted": { "type": "string" }
+        }
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "root": { "classIri": "https://schema.org/Dataset" },
+      "bindings": [
+        {
+          "fieldPointer": "/properties/title",
+          "predicate": "https://schema.org/name",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/active",
+          "predicate": "https://schema.org/isAccessibleForFree",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/count",
+          "predicate": "https://schema.org/numberOfItems",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/scores",
+          "predicate": "https://example.org/vocabulary/score",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/tags",
+          "predicate": "https://schema.org/keywords",
+          "valueKind": "literal"
+        },
+        {
+          "fieldPointer": "/properties/omitted",
+          "predicate": "https://schema.org/description",
+          "valueKind": "literal"
+        }
+      ]
+    }
+  },
+  "response": {
+    "title": "",
+    "active": false,
+    "count": 0,
+    "scores": [1.5, 2.5],
+    "tags": []
+  },
+  "projectionInput": {},
+  "responseConformsToFormSchema": true,
+  "expectedExpandedJsonLd": [
+    {
+      "@type": ["https://schema.org/Dataset"],
+      "https://schema.org/name": [
+        {
+          "@value": "",
+          "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+      ],
+      "https://schema.org/isAccessibleForFree": [
+        {
+          "@value": false,
+          "@type": "http://www.w3.org/2001/XMLSchema#boolean"
+        }
+      ],
+      "https://schema.org/numberOfItems": [
+        {
+          "@value": 0,
+          "@type": "http://www.w3.org/2001/XMLSchema#integer"
+        }
+      ],
+      "https://example.org/vocabulary/score": [
+        {
+          "@value": 1.5,
+          "@type": "http://www.w3.org/2001/XMLSchema#double"
+        },
+        {
+          "@value": 2.5,
+          "@type": "http://www.w3.org/2001/XMLSchema#double"
+        }
+      ]
+    }
+  ],
+  "expectedProjectionDiagnostics": []
+}

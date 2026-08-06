@@ -1,0 +1,69 @@
+{
+  "id": "semantic-projection-language-and-datatype",
+  "description": "Project a fixed language string and a string with an explicit custom datatype.",
+  "conformance": "valid",
+  "template": {
+    "conformsTo": [
+      "https://staplescience.com/profiles/marker-template/core/v1",
+      "https://staplescience.com/profiles/marker-template/semantic/v1"
+    ],
+    "metadata": {
+      "familyId": "urn:uuid:41000000-0000-4000-8000-000000000003",
+      "versionId": "urn:uuid:42000000-0000-4000-8000-000000000003",
+      "version": "draft-1",
+      "status": "draft",
+      "resourceType": "MetadataTemplate",
+      "title": "Language and datatype fixture",
+      "createdAt": "2026-08-06T08:00:00Z",
+      "updatedAt": "2026-08-06T08:00:00Z"
+    },
+    "form": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "code": { "type": "string" }
+        },
+        "required": ["label", "code"]
+      },
+      "uiSchema": {}
+    },
+    "semantics": {
+      "bindings": [
+        {
+          "fieldPointer": "/properties/label",
+          "predicate": "https://www.w3.org/2000/01/rdf-schema#label",
+          "valueKind": "literal",
+          "language": "EN-gb"
+        },
+        {
+          "fieldPointer": "/properties/code",
+          "predicate": "https://schema.org/identifier",
+          "valueKind": "literal",
+          "datatypeIri": "https://example.org/datatypes/LocalCode"
+        }
+      ]
+    }
+  },
+  "response": {
+    "label": "Colour",
+    "code": "A-1"
+  },
+  "projectionInput": {},
+  "responseConformsToFormSchema": true,
+  "expectedExpandedJsonLd": [
+    {
+      "https://www.w3.org/2000/01/rdf-schema#label": [
+        { "@value": "Colour", "@language": "en-gb" }
+      ],
+      "https://schema.org/identifier": [
+        {
+          "@value": "A-1",
+          "@type": "https://example.org/datatypes/LocalCode"
+        }
+      ]
+    }
+  ],
+  "expectedProjectionDiagnostics": []
+}

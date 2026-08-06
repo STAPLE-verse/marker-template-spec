@@ -10,6 +10,7 @@ import {
   validateCoreV1,
 } from "../../scripts/core-v1-conformance.mjs"
 import { validateSemanticV1 } from "../../scripts/semantic-v1-conformance.mjs"
+import { projectSemanticV1 } from "../../scripts/semantic-v1-projector.mjs"
 
 const exampleRoot = path.join(process.cwd(), "examples", "semantic", "v1")
 const semanticSchemaPath = path.join(
@@ -41,7 +42,13 @@ test("Semantic V1 design examples contain Core-valid templates and valid respons
 
   for (const file of files) {
     const example = await readJson(path.join(exampleRoot, file))
-    const { template, response, expectedExpandedJsonLd, expectedDiagnostics } = example
+    const {
+      template,
+      response,
+      projectionInput,
+      expectedExpandedJsonLd,
+      expectedDiagnostics,
+    } = example
 
     assert.equal(typeof example.id, "string", `${file} must have an id`)
     assert.deepEqual(validateCoreV1(template), [], `${file} must contain a Core-valid template`)
@@ -71,9 +78,19 @@ test("Semantic V1 design examples contain Core-valid templates and valid respons
       `${file} semantic diagnostics must match`,
     )
 
-    assert.ok(Array.isArray(expectedExpandedJsonLd), `${file} must contain expanded JSON-LD`)
+    const projection = projectSemanticV1(template, response, projectionInput)
+    assert.deepEqual(
+      projection.diagnostics,
+      expectedDiagnostics.projection,
+      `${file} projection diagnostics must match`,
+    )
+    assert.deepEqual(
+      projection.expandedJsonLd,
+      expectedExpandedJsonLd,
+      `${file} expanded JSON-LD must match`,
+    )
+
     assert.deepEqual(expectedDiagnostics.coreValidation, [])
     assert.deepEqual(expectedDiagnostics.instanceValidation, [])
-    assert.deepEqual(expectedDiagnostics.projection, [])
   }
 })
