@@ -4,22 +4,62 @@ import {
   semanticDefaultDatatype,
   semanticScalarKey,
   validateSemanticV1,
-} from "./semantic-v1-conformance.mjs"
+} from "./semantic.js"
+import type { SemanticBindingAnalysis } from "./semantic.js"
+import type {
+  ConformanceDiagnostic,
+  ExpandedJsonLdLiteral,
+  ExpandedJsonLdNode,
+  ExpandedJsonLdReference,
+  ExpandedJsonLdValue,
+  SemanticBinding,
+  SemanticIriBinding,
+  SemanticLiteralBinding,
+  SemanticProjectionOptions,
+  SemanticProjectionResult,
+  SemanticV1Component,
+} from "./types.js"
 
-function escapePointerToken(token) {
+interface ResponseEntry {
+  value: unknown
+  pointer: string
+}
+
+interface SemanticProjectionDocument {
+  semantics: SemanticV1Component
+}
+
+interface ProjectionContext {
+  children: Map<string | null, SemanticBindingAnalysis[]>
+  diagnostics: ConformanceDiagnostic[]
+}
+
+type DatatypeResolution =
+  | { datatype: string; error?: never }
+  | { datatype?: never; error: true }
+
+function escapePointerToken(token: string | number): string {
   return String(token).replaceAll("~", "~0").replaceAll("/", "~1")
 }
 
-function childPointer(pointer, token) {
+function childPointer(pointer: string, token: string | number): string {
   return `${pointer}/${escapePointerToken(token)}`
 }
 
-function diagnostic(code, pointer, message) {
+function diagnostic(
+  code: string,
+  pointer: string,
+  message: string,
+): ConformanceDiagnostic {
   return { stage: "semantic-projection", code, pointer, message }
 }
 
-function evaluateResponsePath(value, pointer, tokens) {
-  let entries = [{ value, pointer }]
+function evaluateResponsePath(
+  value: unknown,
+  pointer: string,
+  tokens: string[],
+): ResponseEntry[] {
+  let entries: ResponseEntry[] = [{ value, pointer }]
   for (let index = 0; index < tokens.length; ) {
     if (tokens[index] === "properties") {
       const name = tokens[index + 1]
@@ -28,13 +68,14 @@ function evaluateResponsePath(value, pointer, tokens) {
           !entry.value ||
           typeof entry.value !== "object" ||
           Array.isArray(entry.value) ||
+          typeof name !== "string" ||
           !Object.hasOwn(entry.value, name)
         ) {
           return []
         }
         return [
           {
-            value: entry.value[name],
+            value: (entry.value as Record<string, unknown>)[name],
             pointer: childPointer(entry.pointer, name),
           },
         ]
@@ -56,7 +97,7 @@ function evaluateResponsePath(value, pointer, tokens) {
   return entries
 }
 
-function flattenArrayEntries(entries) {
+function flattenArrayEntries(entries: ResponseEntry[]): ResponseEntry[] {
   return entries.flatMap((entry) =>
     Array.isArray(entry.value)
       ? entry.value.map((item, itemIndex) => ({
@@ -67,7 +108,10 @@ function flattenArrayEntries(entries) {
   )
 }
 
-function scalarMatchesSchema(value, schema) {
+function scalarMatchesSchema(
+  value: unknown,
+  schema: SemanticBindingAnalysis["valueSchemas"][number],
+): boolean {
   if (schema.type === "integer") {
     return typeof value === "number" && Number.isInteger(value)
   }
@@ -75,12 +119,15 @@ function scalarMatchesSchema(value, schema) {
   return typeof value === schema.type
 }
 
-function projectedDatatype(value, schemas) {
-  const candidates = new Set(
+function projectedDatatype(
+  value: unknown,
+  schemas: SemanticBindingAnalysis["valueSchemas"],
+): DatatypeResolution {
+  const candidates = new Set<string>(
     schemas
       .filter((schema) => scalarMatchesSchema(value, schema))
       .map(semanticDefaultDatatype)
-      .filter(Boolean),
+      .filter((datatype): datatype is string => datatype !== undefined),
   )
   if (candidates.size === 1) return { datatype: [...candidates][0] }
 
@@ -106,23 +153,42 @@ function projectedDatatype(value, schemas) {
   return { error: true }
 }
 
-function appendValues(subject, predicate, values) {
+function appendValues(
+  subject: ExpandedJsonLdNode,
+  predicate: string,
+  values: ExpandedJsonLdValue[],
+): void {
   if (values.length === 0) return
-  if (!subject[predicate]) subject[predicate] = []
-  subject[predicate].push(...values)
+  const existing = subject[predicate]
+  subject[predicate] = Array.isArray(existing)
+    ? [...(existing as ExpandedJsonLdValue[]), ...values]
+    : [...values]
 }
 
-function relativeTokens(analysis, parentAnalysis) {
-  if (!parentAnalysis) return analysis.tokens
-  const tokens = analysis.tokens.slice(parentAnalysis.tokens.length)
+function isProjectableScalar(value: unknown): value is string | number | boolean {
+  return ["string", "number", "boolean"].includes(typeof value)
+}
+
+function relativeTokens(
+  analysis: SemanticBindingAnalysis,
+  parentAnalysis?: SemanticBindingAnalysis,
+): string[] {
+  const analysisTokens = analysis.tokens ?? []
+  if (!parentAnalysis) return analysisTokens
+  const tokens = analysisTokens.slice(parentAnalysis.tokens?.length ?? 0)
   return tokens[0] === "items" ? tokens.slice(1) : tokens
 }
 
-function projectLiteral(binding, analysis, entries, diagnostics) {
-  const projected = []
+function projectLiteral(
+  binding: SemanticLiteralBinding,
+  analysis: SemanticBindingAnalysis,
+  entries: ResponseEntry[],
+  diagnostics: ConformanceDiagnostic[],
+): ExpandedJsonLdLiteral[] {
+  const projected: ExpandedJsonLdLiteral[] = []
   for (const entry of flattenArrayEntries(entries)) {
     if (entry.value === null || entry.value === undefined) continue
-    if (!["string", "number", "boolean"].includes(typeof entry.value)) {
+    if (!isProjectableScalar(entry.value)) {
       diagnostics.push(
         diagnostic(
           "PROJECTION_VALUE_TYPE_INVALID",
@@ -161,14 +227,18 @@ function projectLiteral(binding, analysis, entries, diagnostics) {
   return projected
 }
 
-function projectIri(binding, entries, diagnostics) {
-  const mappings = new Map(
+function projectIri(
+  binding: SemanticIriBinding,
+  entries: ResponseEntry[],
+  diagnostics: ConformanceDiagnostic[],
+): ExpandedJsonLdReference[] {
+  const mappings = new Map<string, string>(
     (binding.valueMappings ?? []).map((mapping) => [
       semanticScalarKey(mapping.value),
       mapping.iri,
     ]),
   )
-  const projected = []
+  const projected: ExpandedJsonLdReference[] = []
 
   for (const entry of flattenArrayEntries(entries)) {
     if (entry.value === null || entry.value === undefined) continue
@@ -203,9 +273,12 @@ function projectIri(binding, entries, diagnostics) {
   return projected
 }
 
-function createProjectionContext(document, diagnostics) {
+function createProjectionContext(
+  document: SemanticProjectionDocument,
+  diagnostics: ConformanceDiagnostic[],
+): ProjectionContext {
   const analyses = analyzeSemanticV1Bindings(document)
-  const children = new Map()
+  const children = new Map<string | null, SemanticBindingAnalysis[]>()
   for (const analysis of analyses) {
     const parent = analysis.binding.parentNodePointer ?? null
     const values = children.get(parent) ?? []
@@ -215,7 +288,13 @@ function createProjectionContext(document, diagnostics) {
   return { children, diagnostics }
 }
 
-function projectBindings(subject, responseValue, responsePointer, parentAnalysis, context) {
+function projectBindings(
+  subject: ExpandedJsonLdNode,
+  responseValue: unknown,
+  responsePointer: string,
+  parentAnalysis: SemanticBindingAnalysis | undefined,
+  context: ProjectionContext,
+): void {
   const ownerPointer = parentAnalysis?.binding.fieldPointer ?? null
   for (const analysis of context.children.get(ownerPointer) ?? []) {
     const binding = analysis.binding
@@ -242,7 +321,7 @@ function projectBindings(subject, responseValue, responsePointer, parentAnalysis
       continue
     }
 
-    const nodes = []
+    const nodes: ExpandedJsonLdNode[] = []
     for (const entry of flattenArrayEntries(entries)) {
       if (entry.value === null || entry.value === undefined) continue
       if (
@@ -258,7 +337,7 @@ function projectBindings(subject, responseValue, responsePointer, parentAnalysis
         )
         continue
       }
-      const node = {}
+      const node: ExpandedJsonLdNode = {}
       if (binding.classIri) node["@type"] = [binding.classIri]
       projectBindings(node, entry.value, entry.pointer, analysis, context)
       nodes.push(node)
@@ -267,7 +346,11 @@ function projectBindings(subject, responseValue, responsePointer, parentAnalysis
   }
 }
 
-export function projectSemanticV1(document, response, options = {}) {
+export function projectSemanticV1(
+  document: unknown,
+  response: unknown,
+  options: SemanticProjectionOptions = {},
+): SemanticProjectionResult {
   const semanticDiagnostics = validateSemanticV1(document)
   if (semanticDiagnostics.length > 0) {
     return {
@@ -281,7 +364,27 @@ export function projectSemanticV1(document, response, options = {}) {
       ],
     }
   }
-  if (!response || typeof response !== "object" || Array.isArray(response)) {
+  if (
+    !document ||
+    typeof document !== "object" ||
+    !(document as SemanticProjectionDocument).semantics
+  ) {
+    return {
+      expandedJsonLd: null,
+      diagnostics: [
+        diagnostic(
+          "PROJECTION_PRECONDITION_FAILED",
+          "/semantics",
+          "Projection requires a Semantic V1 component",
+        ),
+      ],
+    }
+  }
+  if (
+    !response ||
+    typeof response !== "object" ||
+    Array.isArray(response)
+  ) {
     return {
       expandedJsonLd: null,
       diagnostics: [
@@ -309,14 +412,15 @@ export function projectSemanticV1(document, response, options = {}) {
     }
   }
 
-  const diagnostics = []
-  const root = {}
+  const semanticDocument = document as SemanticProjectionDocument
+  const diagnostics: ConformanceDiagnostic[] = []
+  const root: ExpandedJsonLdNode = {}
   if (options.rootInstanceIri !== undefined) root["@id"] = options.rootInstanceIri
-  if (document.semantics.root?.classIri) {
-    root["@type"] = [document.semantics.root.classIri]
+  if (semanticDocument.semantics.root?.classIri) {
+    root["@type"] = [semanticDocument.semantics.root.classIri]
   }
 
-  const context = createProjectionContext(document, diagnostics)
+  const context = createProjectionContext(semanticDocument, diagnostics)
   projectBindings(root, response, "", undefined, context)
 
   return {

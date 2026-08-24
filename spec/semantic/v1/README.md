@@ -371,15 +371,15 @@ The first five non-normative scenarios are maintained in
 default date datatype, direct ORCID IRI, exact local value-to-IRI mapping, and
 repeated contributors through a local `$ref`.
 
-The reference
-[Semantic V1 validator](../../../scripts/semantic-v1-conformance.mjs) implements
+The optional TypeScript
+[Semantic V1 validator](../../../implementations/typescript/src/semantic.ts) implements
 component-shape validation, absolute-IRI and field-pointer checks, deterministic
 local `$ref` traversal, effective field-type compatibility, exact mapping rules,
 and node ownership with stable diagnostics. Its behavior is exercised by the
 cross-component conformance tests.
 
-The reference
-[Semantic V1 projector](../../../scripts/semantic-v1-projector.mjs) implements
+The optional TypeScript
+[Semantic V1 projector](../../../implementations/typescript/src/projector.ts) implements
 the algorithm above. The design examples fix complete expected expanded
 JSON-LD graphs, while the projector conformance tests cover number, boolean,
 `false`, `0`, empty-string, missing, and `null` behavior; scalar arrays; inline

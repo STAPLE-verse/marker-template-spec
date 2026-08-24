@@ -10,7 +10,7 @@ import {
   validateCoreV1,
   validateSemantics,
   validateFieldPointer,
-} from "../../scripts/core-v1-conformance.mjs"
+} from "@staple-verse/marker-template-runtime"
 
 const repositoryRoot = process.cwd()
 const fixtureRoot = path.join(repositoryRoot, "fixtures", "v1")

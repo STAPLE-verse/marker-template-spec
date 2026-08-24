@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { validateSemanticV1 } from "../../scripts/semantic-v1-conformance.mjs"
+import { validateSemanticV1 } from "@staple-verse/marker-template-runtime"
 
 const XSD = "http://www.w3.org/2001/XMLSchema#"
 

@@ -32,3 +32,7 @@ documented here.
   application rather than the semantic graph.
 - Added portable projection fixtures and an opt-in local JSON-LD 1.1/RDF graph
   validation command backed by an independent processor.
+- Added an optional, strictly typed, browser-safe TypeScript runtime for Core V1
+  validation, Semantic V1 cross-component validation, and expanded JSON-LD
+  projection. Repository conformance tests now exercise this single
+  implementation, replacing the former `.mjs` algorithm files.

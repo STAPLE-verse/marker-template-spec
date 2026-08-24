@@ -24,8 +24,9 @@ Complete Semantic V1 validation additionally checks:
 - node containment and nearest-parent ownership; and
 - missing, invalid, self-referential, or cyclic `parentNodePointer` values.
 
-The reference implementation of those rules and its stable diagnostics are in
-[`scripts/semantic-v1-conformance.mjs`](../../../scripts/semantic-v1-conformance.mjs).
+The optional TypeScript implementation of those rules and stable diagnostics is
+in
+[`implementations/typescript/src/semantic.ts`](../../../implementations/typescript/src/semantic.ts).
 
 The Core package schema deliberately does not `$ref` this schema. Core treats
 the component as opaque and dispatches it to the Semantic V1 validator when

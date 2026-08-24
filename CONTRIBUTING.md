@@ -25,6 +25,10 @@ Examples, explanatory text, and repository validation tooling may improve
 without changing the contract. They must not contradict the normative
 specification.
 
+The TypeScript runtime is non-normative. A runtime change must remain compatible
+with the normative schemas, algorithms, diagnostics, and portable fixtures. A
+runtime bug fix does not by itself create a new profile version.
+
 ## Pull request checks
 
 Run:

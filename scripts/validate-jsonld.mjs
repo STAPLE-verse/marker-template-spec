@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 import jsonld from "jsonld"
-import { projectSemanticV1 } from "./semantic-v1-projector.mjs"
+import { projectSemanticV1 } from "@staple-verse/marker-template-runtime"
 
 const repositoryRoot = process.cwd()
 const scenarioRoots = [

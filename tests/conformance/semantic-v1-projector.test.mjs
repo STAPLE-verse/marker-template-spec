@@ -4,9 +4,11 @@ import path from "node:path"
 import test from "node:test"
 import Ajv from "ajv"
 import addFormats from "ajv-formats"
-import { validateCoreV1 } from "../../scripts/core-v1-conformance.mjs"
-import { validateSemanticV1 } from "../../scripts/semantic-v1-conformance.mjs"
-import { projectSemanticV1 } from "../../scripts/semantic-v1-projector.mjs"
+import {
+  projectSemanticV1,
+  validateCoreV1,
+  validateSemanticV1,
+} from "@staple-verse/marker-template-runtime"
 
 const fixtureRoot = path.join(
   process.cwd(),
@@ -31,7 +33,7 @@ async function readJson(file) {
   return JSON.parse(await readFile(file, "utf8"))
 }
 
-test("portable Semantic V1 projection fixtures match the reference projector", async () => {
+test("portable Semantic V1 projection fixtures match the TypeScript runtime", async () => {
   const files = await findJsonFiles(fixtureRoot)
   assert.equal(files.length, 6)
 
@@ -68,4 +70,18 @@ test("portable Semantic V1 projection fixtures match the reference projector", a
       `${relativeFile} projection diagnostics`,
     )
   }
+})
+
+test("projection fails atomically when the Semantic V1 component is absent", () => {
+  assert.deepEqual(projectSemanticV1({}, {}), {
+    expandedJsonLd: null,
+    diagnostics: [
+      {
+        stage: "semantic-projection",
+        code: "PROJECTION_PRECONDITION_FAILED",
+        pointer: "/semantics",
+        message: "Projection requires a Semantic V1 component",
+      },
+    ],
+  })
 })

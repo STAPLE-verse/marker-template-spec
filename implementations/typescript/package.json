@@ -1,0 +1,33 @@
+{
+  "name": "@staple-verse/marker-template-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Optional TypeScript runtime for the MARKER Metadata Template Specification",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/generate-schema-module.mjs && tsc -p tsconfig.json",
+    "check": "npm run build",
+    "dev": "node scripts/generate-schema-module.mjs && tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

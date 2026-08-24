@@ -1,25 +1,61 @@
-import { readFile } from "node:fs/promises"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import Ajv2020 from "ajv/dist/2020.js"
+import { semanticV1ComponentSchema } from "./generated/schemas.js"
+import type {
+  ConformanceDiagnostic,
+  JsonPrimitive,
+  SemanticBinding,
+  SemanticV1Component,
+} from "./types.js"
 
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
-const repositoryRoot = path.resolve(scriptDirectory, "..")
-const componentSchema = JSON.parse(
-  await readFile(
-    path.join(
-      repositoryRoot,
-      "schemas",
-      "semantic",
-      "v1",
-      "semantics.schema.json",
-    ),
-    "utf8",
-  ),
-)
+type JsonSchemaNode = Record<string, unknown>
+type ScalarType = "boolean" | "integer" | "number" | "string"
+type FieldResolutionStatus = "invalid" | "cycle" | "unresolved" | "resolved"
+
+interface TypedValueSchema extends JsonSchemaNode {
+  type: string
+  format?: string
+  enum?: JsonPrimitive[]
+  const?: JsonPrimitive
+}
+
+interface VariantState {
+  active: Set<object>
+  visited: Set<object>
+  result: JsonSchemaNode[]
+  cycles: Set<object>
+}
+
+interface FieldResolution {
+  status: FieldResolutionStatus
+  schemas: JsonSchemaNode[]
+  tokens?: string[] | undefined
+}
+
+interface ResolvedBinding {
+  status: FieldResolutionStatus
+  schemas: JsonSchemaNode[]
+  tokens?: string[] | undefined
+}
+
+export interface SemanticBindingAnalysis {
+  index: number
+  binding: SemanticBinding
+  tokens?: string[] | undefined
+  resolutionStatus: FieldResolutionStatus
+  fieldSchemas: JsonSchemaNode[]
+  valueSchemas: TypedValueSchema[]
+  unsupportedType: boolean
+}
+
+interface SemanticDocument {
+  form?: {
+    schema?: JsonSchemaNode
+  }
+  semantics?: SemanticV1Component
+}
 
 const componentAjv = new Ajv2020({ allErrors: true, strict: true })
-const validateComponent = componentAjv.compile(componentSchema)
+const validateComponent = componentAjv.compile(semanticV1ComponentSchema)
 
 const XSD = "http://www.w3.org/2001/XMLSchema#"
 const scalarTypes = new Set(["boolean", "integer", "number", "string"])
@@ -56,21 +92,26 @@ const grandfatheredLanguageTags = new Set(
   ].map((tag) => tag.toLowerCase()),
 )
 
-function escapePointerToken(token) {
+function escapePointerToken(token: string | number): string {
   return String(token).replaceAll("~", "~0").replaceAll("/", "~1")
 }
 
-function childPointer(pointer, token) {
+function childPointer(pointer: string, token: string | number): string {
   return `${pointer}/${escapePointerToken(token)}`
 }
 
-function diagnostic(code, pointer, message, stage = "semantic-profile") {
+function diagnostic(
+  code: string,
+  pointer: string,
+  message: string,
+  stage = "semantic-profile",
+): ConformanceDiagnostic {
   return { stage, code, pointer, message }
 }
 
-function componentDiagnostics(semantics) {
+function componentDiagnostics(semantics: unknown): ConformanceDiagnostic[] {
   if (validateComponent(semantics)) return []
-  return validateComponent.errors.map((error) => {
+  return (validateComponent.errors ?? []).map((error) => {
     const pointer =
       error.keyword === "required"
         ? childPointer(`/semantics${error.instancePath}`, error.params.missingProperty)
@@ -89,23 +130,23 @@ function componentDiagnostics(semantics) {
   })
 }
 
-function resolveJsonPointer(root, reference) {
+function resolveJsonPointer(root: unknown, reference: string): unknown {
   if (reference === "#") return root
   if (!reference.startsWith("#/")) return undefined
 
-  let current = root
+  let current: unknown = root
   for (const encodedToken of reference.slice(2).split("/")) {
     if (/~(?:[^01]|$)/u.test(encodedToken)) return undefined
     const token = encodedToken.replaceAll("~1", "/").replaceAll("~0", "~")
     if (!current || typeof current !== "object" || !(token in current)) {
       return undefined
     }
-    current = current[token]
+    current = (current as Record<string, unknown>)[token]
   }
   return current
 }
 
-function parseFieldPointer(pointer) {
+function parseFieldPointer(pointer: unknown): string[] | undefined {
   if (typeof pointer !== "string" || !pointer.startsWith("/")) return undefined
   const encodedTokens = pointer.slice(1).split("/")
   if (encodedTokens.some((token) => /~(?:[^01]|$)/u.test(token))) return undefined
@@ -129,11 +170,15 @@ function parseFieldPointer(pointer) {
   return tokens
 }
 
-function expandSchemaVariants(schema, root, state = undefined) {
-  const active = state?.active ?? new Set()
-  const visited = state?.visited ?? new Set()
+function expandSchemaVariants(
+  schema: unknown,
+  root: JsonSchemaNode,
+  state?: VariantState,
+): { variants: JsonSchemaNode[]; cycles: Set<object> } {
+  const active = state?.active ?? new Set<object>()
+  const visited = state?.visited ?? new Set<object>()
   const result = state?.result ?? []
-  const cycles = state?.cycles ?? new Set()
+  const cycles = state?.cycles ?? new Set<object>()
 
   if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
     return { variants: result, cycles }
@@ -146,8 +191,9 @@ function expandSchemaVariants(schema, root, state = undefined) {
 
   visited.add(schema)
   active.add(schema)
-  if (typeof schema.$ref === "string") {
-    const target = resolveJsonPointer(root, schema.$ref)
+  const schemaNode = schema as JsonSchemaNode
+  if (typeof schemaNode.$ref === "string") {
+    const target = resolveJsonPointer(root, schemaNode.$ref)
     if (target !== undefined) {
       expandSchemaVariants(target, root, { active, visited, result, cycles })
     }
@@ -155,16 +201,18 @@ function expandSchemaVariants(schema, root, state = undefined) {
     return { variants: result, cycles }
   }
 
-  result.push(schema)
+  result.push(schemaNode)
 
   for (const keyword of schemaVariantArrayKeywords) {
-    for (const child of schema[keyword] ?? []) {
+    const children = schemaNode[keyword]
+    if (!Array.isArray(children)) continue
+    for (const child of children) {
       expandSchemaVariants(child, root, { active, visited, result, cycles })
     }
   }
   for (const keyword of schemaVariantObjectKeywords) {
-    if (schema[keyword] && typeof schema[keyword] === "object") {
-      expandSchemaVariants(schema[keyword], root, {
+    if (schemaNode[keyword] && typeof schemaNode[keyword] === "object") {
+      expandSchemaVariants(schemaNode[keyword], root, {
         active,
         visited,
         result,
@@ -172,7 +220,12 @@ function expandSchemaVariants(schema, root, state = undefined) {
       })
     }
   }
-  for (const dependency of Object.values(schema.dependencies ?? {})) {
+  const dependencies = schemaNode.dependencies
+  for (const dependency of Object.values(
+    dependencies && typeof dependencies === "object" && !Array.isArray(dependencies)
+      ? dependencies
+      : {},
+  )) {
     if (!Array.isArray(dependency)) {
       expandSchemaVariants(dependency, root, {
         active,
@@ -187,30 +240,37 @@ function expandSchemaVariants(schema, root, state = undefined) {
   return { variants: result, cycles }
 }
 
-function resolveFieldPointer(root, pointer) {
+function resolveFieldPointer(root: JsonSchemaNode, pointer: string): FieldResolution {
   const tokens = parseFieldPointer(pointer)
   if (!tokens) return { status: "invalid", schemas: [], tokens: undefined }
 
-  let candidates = [root]
+  let candidates: JsonSchemaNode[] = [root]
   let encounteredCycle = false
   for (let index = 0; index < tokens.length; ) {
-    const next = []
+    const next: JsonSchemaNode[] = []
     for (const candidate of candidates) {
       const { variants, cycles } = expandSchemaVariants(candidate, root)
       encounteredCycle ||= cycles.size > 0
       if (tokens[index] === "properties") {
         const name = tokens[index + 1]
         for (const variant of variants) {
-          const child = variant.properties?.[name]
+          const properties = variant.properties
+          const child =
+            typeof name === "string" &&
+            properties &&
+            typeof properties === "object" &&
+            !Array.isArray(properties)
+              ? (properties as Record<string, unknown>)[name]
+              : undefined
           if (child && typeof child === "object" && !Array.isArray(child)) {
-            next.push(child)
+            next.push(child as JsonSchemaNode)
           }
         }
       } else {
         for (const variant of variants) {
           const child = variant.items
           if (child && typeof child === "object" && !Array.isArray(child)) {
-            next.push(child)
+            next.push(child as JsonSchemaNode)
           }
         }
       }
@@ -229,8 +289,11 @@ function resolveFieldPointer(root, pointer) {
   return { status: "resolved", schemas: candidates, tokens }
 }
 
-function valueSchemasForField(schemas, root) {
-  const result = []
+function valueSchemasForField(
+  schemas: JsonSchemaNode[],
+  root: JsonSchemaNode,
+): { schemas: TypedValueSchema[]; unsupported: boolean } {
+  const result: TypedValueSchema[] = []
   let unsupported = false
 
   for (const schema of schemas) {
@@ -242,7 +305,7 @@ function valueSchemasForField(schemas, root) {
           continue
         }
         const { variants: itemVariants } = expandSchemaVariants(variant.items, root)
-        const typedItems = itemVariants.flatMap((item) => {
+        const typedItems = itemVariants.flatMap<TypedValueSchema>((item) => {
           const type = inferSchemaType(item)
           if (type) return [{ ...item, type }]
           if (typeof item.format === "string") {
@@ -265,13 +328,13 @@ function valueSchemasForField(schemas, root) {
   return { schemas: [...new Set(result)], unsupported }
 }
 
-function jsonScalarType(value) {
+function jsonScalarType(value: unknown): ScalarType | undefined {
   if (typeof value === "number") return Number.isInteger(value) ? "integer" : "number"
   if (value === null || !scalarTypes.has(typeof value)) return undefined
-  return typeof value
+  return typeof value as ScalarType
 }
 
-function inferSchemaType(schema) {
+function inferSchemaType(schema: JsonSchemaNode): string | undefined {
   if (typeof schema.type === "string") return schema.type
   if (Object.hasOwn(schema, "const")) return jsonScalarType(schema.const)
   if (Array.isArray(schema.enum) && schema.enum.length > 0) {
@@ -284,7 +347,7 @@ function inferSchemaType(schema) {
   return undefined
 }
 
-export function isSemanticAbsoluteIri(value) {
+export function isSemanticAbsoluteIri(value: unknown): value is string {
   if (typeof value !== "string" || !/^[A-Za-z][A-Za-z0-9+.-]*:/u.test(value)) {
     return false
   }
@@ -298,7 +361,7 @@ export function isSemanticAbsoluteIri(value) {
   }
 }
 
-function isLanguageTag(value) {
+function isLanguageTag(value: string): boolean {
   const lower = value.toLowerCase()
   if (grandfatheredLanguageTags.has(lower)) return true
   if (/^x(?:-[A-Za-z0-9]{1,8})+$/u.test(value)) return true
@@ -309,18 +372,18 @@ function isLanguageTag(value) {
   }
 }
 
-export function semanticScalarKey(value) {
+export function semanticScalarKey(value: unknown): string {
   if (typeof value === "number") return `number:${Object.is(value, -0) ? 0 : value}`
   return `${typeof value}:${String(value)}`
 }
 
-function scalarMatchesType(value, type) {
+function scalarMatchesType(value: unknown, type: string): boolean {
   if (type === "integer") return typeof value === "number" && Number.isInteger(value)
   if (type === "number") return typeof value === "number"
   return typeof value === type
 }
 
-export function semanticDefaultDatatype(schema) {
+export function semanticDefaultDatatype(schema: TypedValueSchema): string | undefined {
   if (schema.type === "string") {
     if (schema.format === "date") return `${XSD}date`
     if (schema.format === "date-time") return `${XSD}dateTime`
@@ -333,12 +396,15 @@ export function semanticDefaultDatatype(schema) {
   return undefined
 }
 
-function bindingPointer(index, property = undefined) {
+function bindingPointer(index: number, property?: string): string {
   const pointer = `/semantics/bindings/${index}`
   return property === undefined ? pointer : childPointer(pointer, property)
 }
 
-function validateIris(semantics, diagnostics) {
+function validateIris(
+  semantics: SemanticV1Component,
+  diagnostics: ConformanceDiagnostic[],
+): void {
   if (semantics.root && !isSemanticAbsoluteIri(semantics.root.classIri)) {
     diagnostics.push(
       diagnostic(
@@ -350,11 +416,16 @@ function validateIris(semantics, diagnostics) {
   }
 
   for (const [index, binding] of semantics.bindings.entries()) {
-    for (const property of ["predicate", "datatypeIri", "classIri"]) {
-      if (
-        binding[property] !== undefined &&
-        !isSemanticAbsoluteIri(binding[property])
-      ) {
+    const iriProperties: Array<[string, string | undefined]> = [
+      ["predicate", binding.predicate],
+      [
+        "datatypeIri",
+        binding.valueKind === "literal" ? binding.datatypeIri : undefined,
+      ],
+      ["classIri", binding.valueKind === "node" ? binding.classIri : undefined],
+    ]
+    for (const [property, value] of iriProperties) {
+      if (value !== undefined && !isSemanticAbsoluteIri(value)) {
         diagnostics.push(
           diagnostic(
             "SEMANTIC_IRI_INVALID",
@@ -364,7 +435,8 @@ function validateIris(semantics, diagnostics) {
         )
       }
     }
-    for (const [mappingIndex, mapping] of (binding.valueMappings ?? []).entries()) {
+    const mappings = binding.valueKind === "iri" ? binding.valueMappings ?? [] : []
+    for (const [mappingIndex, mapping] of mappings.entries()) {
       if (!isSemanticAbsoluteIri(mapping.iri)) {
         diagnostics.push(
           diagnostic(
@@ -378,7 +450,12 @@ function validateIris(semantics, diagnostics) {
   }
 }
 
-function validateBindingCompatibility(binding, index, valueSchemas, diagnostics) {
+function validateBindingCompatibility(
+  binding: SemanticBinding,
+  index: number,
+  valueSchemas: TypedValueSchema[],
+  diagnostics: ConformanceDiagnostic[],
+): void {
   const types = new Set(valueSchemas.map((schema) => schema.type))
   const scalarOnly = [...types].every((type) => scalarTypes.has(type))
   const objectOnly = types.size > 0 && [...types].every((type) => type === "object")
@@ -463,9 +540,14 @@ function validateBindingCompatibility(binding, index, valueSchemas, diagnostics)
   }
 }
 
-function validateValueMappings(binding, index, valueSchemas, diagnostics) {
-  if (!binding.valueMappings) return
-  const seen = new Set()
+function validateValueMappings(
+  binding: SemanticBinding,
+  index: number,
+  valueSchemas: TypedValueSchema[],
+  diagnostics: ConformanceDiagnostic[],
+): void {
+  if (binding.valueKind !== "iri" || !binding.valueMappings) return
+  const seen = new Set<string>()
   const mappingsPointer = bindingPointer(index, "valueMappings")
 
   for (const [mappingIndex, mapping] of binding.valueMappings.entries()) {
@@ -501,9 +583,13 @@ function validateValueMappings(binding, index, valueSchemas, diagnostics) {
   )
   if (finiteValueSets.some((values) => values === undefined)) return
 
-  const allowed = new Map()
+  const allowed = new Map<string, JsonPrimitive>()
   for (const values of finiteValueSets) {
-    for (const value of values) allowed.set(semanticScalarKey(value), value)
+    if (!values) continue
+    for (const value of values) {
+      if (value === undefined) continue
+      allowed.set(semanticScalarKey(value), value)
+    }
   }
   for (const [mappingIndex, mapping] of binding.valueMappings.entries()) {
     if (!allowed.has(semanticScalarKey(mapping.value))) {
@@ -529,15 +615,19 @@ function validateValueMappings(binding, index, valueSchemas, diagnostics) {
   }
 }
 
-function isStrictPointerAncestor(ancestorTokens, childTokens) {
+function isStrictPointerAncestor(ancestorTokens: string[], childTokens: string[]): boolean {
   return (
     ancestorTokens.length < childTokens.length &&
     ancestorTokens.every((token, index) => token === childTokens[index])
   )
 }
 
-function validateNodeOwnership(bindings, resolved, diagnostics) {
-  const indicesByPointer = new Map()
+function validateNodeOwnership(
+  bindings: SemanticBinding[],
+  resolved: ResolvedBinding[],
+  diagnostics: ConformanceDiagnostic[],
+): void {
+  const indicesByPointer = new Map<string, number[]>()
   for (const [index, binding] of bindings.entries()) {
     const indices = indicesByPointer.get(binding.fieldPointer) ?? []
     indices.push(index)
@@ -553,7 +643,7 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
     }
   }
 
-  const parentByIndex = new Map()
+  const parentByIndex = new Map<number, number>()
   for (const [index, binding] of bindings.entries()) {
     const childTokens = resolved[index]?.tokens
     if (!childTokens) continue
@@ -562,13 +652,15 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
       .filter(
         ({ candidate, candidateIndex }) =>
           candidate.valueKind === "node" &&
-          resolved[candidateIndex]?.tokens &&
+          resolved[candidateIndex]?.tokens !== undefined &&
           isStrictPointerAncestor(resolved[candidateIndex].tokens, childTokens),
       )
       .sort(
-        (left, right) =>
-          resolved[right.candidateIndex].tokens.length -
-          resolved[left.candidateIndex].tokens.length,
+        (left, right) => {
+          const rightLength = resolved[right.candidateIndex]?.tokens?.length ?? 0
+          const leftLength = resolved[left.candidateIndex]?.tokens?.length ?? 0
+          return rightLength - leftLength
+        },
       )
     const nearest = containingNodes[0]
 
@@ -625,7 +717,7 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
 
     const parentIndex = parentIndices[0]
     parentByIndex.set(index, parentIndex)
-    if (bindings[parentIndex].valueKind !== "node") {
+    if (parentIndex === undefined || bindings[parentIndex]?.valueKind !== "node") {
       diagnostics.push(
         diagnostic(
           "SEMANTIC_PARENT_NOT_NODE",
@@ -651,7 +743,7 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
   }
 
   for (const startIndex of parentByIndex.keys()) {
-    const path = new Set()
+    const path = new Set<number>()
     let current = startIndex
     while (parentByIndex.has(current)) {
       if (path.has(current)) {
@@ -665,19 +757,23 @@ function validateNodeOwnership(bindings, resolved, diagnostics) {
         break
       }
       path.add(current)
-      current = parentByIndex.get(current)
+      const parent = parentByIndex.get(current)
+      if (parent === undefined) break
+      current = parent
     }
   }
 }
 
-export function analyzeSemanticV1Bindings(document) {
-  const rootSchema = document?.form?.schema
-  const bindings = document?.semantics?.bindings
+export function analyzeSemanticV1Bindings(document: unknown): SemanticBindingAnalysis[] {
+  if (!document || typeof document !== "object") return []
+  const candidate = document as SemanticDocument
+  const rootSchema = candidate.form?.schema
+  const bindings = candidate.semantics?.bindings
   if (!rootSchema || typeof rootSchema !== "object" || !Array.isArray(bindings)) {
     return []
   }
 
-  return bindings.map((binding, index) => {
+  return bindings.map((binding, index): SemanticBindingAnalysis => {
     const resolution = resolveFieldPointer(rootSchema, binding.fieldPointer)
     const values =
       resolution.status === "resolved"
@@ -695,17 +791,19 @@ export function analyzeSemanticV1Bindings(document) {
   })
 }
 
-export function validateSemanticV1(document) {
-  if (!document || typeof document !== "object" || document.semantics === undefined) {
+export function validateSemanticV1(document: unknown): ConformanceDiagnostic[] {
+  if (!document || typeof document !== "object") return []
+  const candidate = document as SemanticDocument
+  if (candidate.semantics === undefined) {
     return []
   }
 
-  const structuralDiagnostics = componentDiagnostics(document.semantics)
+  const structuralDiagnostics = componentDiagnostics(candidate.semantics)
   if (structuralDiagnostics.length > 0) return structuralDiagnostics
 
-  const diagnostics = []
-  const semantics = document.semantics
-  const rootSchema = document.form?.schema
+  const diagnostics: ConformanceDiagnostic[] = []
+  const semantics = candidate.semantics
+  const rootSchema = candidate.form?.schema
   if (!rootSchema || typeof rootSchema !== "object") {
     return [
       diagnostic(
@@ -718,7 +816,7 @@ export function validateSemanticV1(document) {
 
   validateIris(semantics, diagnostics)
 
-  const resolved = []
+  const resolved: ResolvedBinding[] = []
   for (const analysis of analyzeSemanticV1Bindings(document)) {
     const { binding, index } = analysis
     resolved[index] = {
@@ -761,6 +859,9 @@ export function validateSemanticV1(document) {
   return diagnostics
 }
 
-export function semanticV1Validator(_semantics, document) {
+export function semanticV1Validator(
+  _semantics: unknown,
+  document: unknown,
+): ConformanceDiagnostic[] {
   return validateSemanticV1(document)
 }

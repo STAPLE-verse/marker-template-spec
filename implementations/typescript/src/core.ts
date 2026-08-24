@@ -1,9 +1,37 @@
-import { readFile } from "node:fs/promises"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import Ajv from "ajv"
 import Ajv2020 from "ajv/dist/2020.js"
 import addFormats from "ajv-formats"
+import { coreV1PackageSchema } from "./generated/schemas.js"
+import type { ConformanceDiagnostic, JsonObject } from "./types.js"
+
+type JsonSchemaNode = Record<string, unknown>
+
+interface CoreV1Document {
+  form: {
+    schema: JsonSchemaNode
+    uiSchema: JsonObject
+  }
+  metadata: {
+    familyId: string
+    versionId: string
+    createdAt: string
+    updatedAt: string
+    publishedAt?: string
+    status: string
+  }
+  semantics?: unknown
+}
+
+export interface SemanticsValidationResult {
+  profile: typeof SEMANTIC_PROFILE_URI
+  status: "unrecognized" | "invalid" | "valid"
+  diagnostics: ConformanceDiagnostic[]
+}
+
+export type SemanticsValidator = (
+  semantics: unknown,
+  document: unknown,
+) => ConformanceDiagnostic[] | null | undefined
 
 export const CORE_PROFILE_URI =
   "https://staplescience.com/profiles/marker-template/core/v1"
@@ -13,18 +41,9 @@ export const PACKAGE_SCHEMA_ID =
   "https://staplescience.com/schemas/marker-template/core/v1/package.schema.json"
 export const FORM_SCHEMA_DIALECT = "http://json-schema.org/draft-07/schema#"
 
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
-const repositoryRoot = path.resolve(scriptDirectory, "..")
-const packageSchema = JSON.parse(
-  await readFile(
-    path.join(repositoryRoot, "schemas", "v1", "marker-template.schema.json"),
-    "utf8",
-  ),
-)
-
 const packageAjv = new Ajv2020({ allErrors: true, strict: true, validateFormats: true })
 addFormats(packageAjv)
-const validatePackage = packageAjv.compile(packageSchema)
+const validatePackage = packageAjv.compile(coreV1PackageSchema)
 
 const formSchemaAjv = new Ajv({ allErrors: true, strict: false, validateFormats: false })
 
@@ -106,22 +125,27 @@ const allowedWidgets = new Set([
 const schemaArrayKeywords = ["allOf", "anyOf", "oneOf"]
 const schemaObjectKeywords = ["not", "if", "then", "else"]
 
-function escapePointerToken(token) {
+function escapePointerToken(token: string | number): string {
   return String(token).replaceAll("~", "~0").replaceAll("/", "~1")
 }
 
-function childPointer(pointer, token) {
+function childPointer(pointer: string, token: string | number): string {
   return `${pointer}/${escapePointerToken(token)}`
 }
 
-function diagnostic(stage, code, pointer, message) {
+function diagnostic(
+  stage: string,
+  code: string,
+  pointer: string,
+  message: string,
+): ConformanceDiagnostic {
   return { stage, code, pointer, message }
 }
 
-function packageDiagnostics(document) {
+function packageDiagnostics(document: unknown): ConformanceDiagnostic[] {
   if (validatePackage(document)) return []
 
-  return validatePackage.errors.map((error) => {
+  return (validatePackage.errors ?? []).map((error) => {
     const pointer =
       error.keyword === "required"
         ? childPointer(error.instancePath, error.params.missingProperty)
@@ -132,24 +156,31 @@ function packageDiagnostics(document) {
   })
 }
 
-function resolveLocalReference(root, reference) {
+function resolveLocalReference(root: unknown, reference: string): unknown {
   if (reference === "#") return root
   if (!reference.startsWith("#/")) return undefined
 
-  let current = root
+  let current: unknown = root
   for (const encodedToken of reference.slice(2).split("/")) {
     const token = encodedToken.replaceAll("~1", "/").replaceAll("~0", "~")
     if (!current || typeof current !== "object" || !(token in current)) return undefined
-    current = current[token]
+    current = (current as Record<string, unknown>)[token]
   }
   return current
 }
 
-function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()) {
+function inspectSchemaNode(
+  node: unknown,
+  pointer: string,
+  root: JsonSchemaNode,
+  diagnostics: ConformanceDiagnostic[],
+  visited = new Set<object>(),
+): void {
   if (!node || typeof node !== "object" || Array.isArray(node) || visited.has(node)) return
   visited.add(node)
+  const schema = node as JsonSchemaNode
 
-  for (const keyword of Object.keys(node)) {
+  for (const keyword of Object.keys(schema)) {
     if (!allowedSchemaKeywords.has(keyword)) {
       diagnostics.push(
         diagnostic(
@@ -162,7 +193,7 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
     }
   }
 
-  if (Array.isArray(node.type)) {
+  if (Array.isArray(schema.type)) {
     diagnostics.push(
       diagnostic(
         "core-profile",
@@ -173,19 +204,19 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
     )
   }
 
-  if (typeof node.format === "string" && !allowedFormats.has(node.format)) {
+  if (typeof schema.format === "string" && !allowedFormats.has(schema.format)) {
     diagnostics.push(
       diagnostic(
         "core-profile",
         "CORE_UNSUPPORTED_FORMAT",
         childPointer(pointer, "format"),
-        `The ${node.format} format is outside the Core V1 subset`,
+        `The ${schema.format} format is outside the Core V1 subset`,
       ),
     )
   }
 
-  if (typeof node.$ref === "string") {
-    if (!node.$ref.startsWith("#/definitions/")) {
+  if (typeof schema.$ref === "string") {
+    if (!schema.$ref.startsWith("#/definitions/")) {
       diagnostics.push(
         diagnostic(
           "core-profile",
@@ -194,19 +225,19 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
           "Core V1 references must target local definitions",
         ),
       )
-    } else if (resolveLocalReference(root, node.$ref) === undefined) {
+    } else if (resolveLocalReference(root, schema.$ref) === undefined) {
       diagnostics.push(
         diagnostic(
           "core-profile",
           "CORE_UNRESOLVED_REF",
           childPointer(pointer, "$ref"),
-          `Reference ${node.$ref} does not resolve`,
+          `Reference ${schema.$ref} does not resolve`,
         ),
       )
     }
   }
 
-  if (Array.isArray(node.items)) {
+  if (Array.isArray(schema.items)) {
     diagnostics.push(
       diagnostic(
         "core-profile",
@@ -215,13 +246,13 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
         "Core V1 arrays must have one homogeneous item schema",
       ),
     )
-  } else if (node.items && typeof node.items === "object") {
-    inspectSchemaNode(node.items, childPointer(pointer, "items"), root, diagnostics, visited)
+  } else if (schema.items && typeof schema.items === "object") {
+    inspectSchemaNode(schema.items, childPointer(pointer, "items"), root, diagnostics, visited)
   }
 
   if (
-    node.additionalProperties !== undefined &&
-    typeof node.additionalProperties !== "boolean"
+    schema.additionalProperties !== undefined &&
+    typeof schema.additionalProperties !== "boolean"
   ) {
     diagnostics.push(
       diagnostic(
@@ -234,7 +265,9 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
   }
 
   for (const container of ["properties", "definitions"]) {
-    for (const [name, child] of Object.entries(node[container] ?? {})) {
+    const children = schema[container]
+    if (!children || typeof children !== "object" || Array.isArray(children)) continue
+    for (const [name, child] of Object.entries(children)) {
       inspectSchemaNode(
         child,
         childPointer(childPointer(pointer, container), name),
@@ -246,7 +279,9 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
   }
 
   for (const keyword of schemaArrayKeywords) {
-    node[keyword]?.forEach((child, index) =>
+    const children = schema[keyword]
+    if (!Array.isArray(children)) continue
+    children.forEach((child, index) =>
       inspectSchemaNode(
         child,
         childPointer(childPointer(pointer, keyword), index),
@@ -258,9 +293,9 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
   }
 
   for (const keyword of schemaObjectKeywords) {
-    if (node[keyword] && typeof node[keyword] === "object") {
+    if (schema[keyword] && typeof schema[keyword] === "object") {
       inspectSchemaNode(
-        node[keyword],
+        schema[keyword],
         childPointer(pointer, keyword),
         root,
         diagnostics,
@@ -269,7 +304,9 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
     }
   }
 
-  for (const [name, dependency] of Object.entries(node.dependencies ?? {})) {
+  const dependencies = schema.dependencies
+  if (!dependencies || typeof dependencies !== "object" || Array.isArray(dependencies)) return
+  for (const [name, dependency] of Object.entries(dependencies)) {
     if (!Array.isArray(dependency)) {
       inspectSchemaNode(
         dependency,
@@ -282,35 +319,54 @@ function inspectSchemaNode(node, pointer, root, diagnostics, visited = new Set()
   }
 }
 
-function schemaVariants(schema, root, seen = new Set()) {
+function schemaVariants(
+  schema: unknown,
+  root: JsonSchemaNode,
+  seen = new Set<object>(),
+): JsonSchemaNode[] {
   if (!schema || typeof schema !== "object" || Array.isArray(schema) || seen.has(schema)) return []
   seen.add(schema)
+  const schemaNode = schema as JsonSchemaNode
 
-  const variants = [schema]
-  if (typeof schema.$ref === "string") {
-    variants.push(...schemaVariants(resolveLocalReference(root, schema.$ref), root, seen))
+  const variants = [schemaNode]
+  if (typeof schemaNode.$ref === "string") {
+    variants.push(...schemaVariants(resolveLocalReference(root, schemaNode.$ref), root, seen))
   }
   for (const keyword of [...schemaArrayKeywords, ...schemaObjectKeywords]) {
-    const children = Array.isArray(schema[keyword]) ? schema[keyword] : [schema[keyword]]
+    const value = schemaNode[keyword]
+    const children = Array.isArray(value) ? value : [value]
     for (const child of children) variants.push(...schemaVariants(child, root, seen))
   }
-  for (const dependency of Object.values(schema.dependencies ?? {})) {
+  const dependencies = schemaNode.dependencies
+  for (const dependency of Object.values(
+    dependencies && typeof dependencies === "object" && !Array.isArray(dependencies)
+      ? dependencies
+      : {},
+  )) {
     if (!Array.isArray(dependency)) variants.push(...schemaVariants(dependency, root, seen))
   }
   return variants
 }
 
-function fieldEntries(schema, root) {
-  const entries = new Map()
+function fieldEntries(schema: unknown, root: JsonSchemaNode): Map<string, unknown> {
+  const entries = new Map<string, unknown>()
   for (const variant of schemaVariants(schema, root)) {
-    for (const [name, child] of Object.entries(variant.properties ?? {})) {
+    const properties = variant.properties
+    if (!properties || typeof properties !== "object" || Array.isArray(properties)) continue
+    for (const [name, child] of Object.entries(properties)) {
       if (!entries.has(name)) entries.set(name, child)
     }
   }
   return entries
 }
 
-function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
+function inspectUiNode(
+  uiNode: unknown,
+  schema: unknown,
+  pointer: string,
+  rootSchema: JsonSchemaNode,
+  diagnostics: ConformanceDiagnostic[],
+): void {
   if (!uiNode || typeof uiNode !== "object" || Array.isArray(uiNode)) {
     diagnostics.push(
       diagnostic(
@@ -323,8 +379,9 @@ function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
     return
   }
 
+  const uiObject = uiNode as Record<string, unknown>
   const fields = fieldEntries(schema, rootSchema)
-  const order = uiNode["ui:order"]
+  const order = uiObject["ui:order"]
   if (order !== undefined && !Array.isArray(order)) {
     diagnostics.push(
       diagnostic(
@@ -374,7 +431,7 @@ function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
     }
   }
 
-  const widget = uiNode["ui:widget"]
+  const widget = uiObject["ui:widget"]
   if (widget !== undefined && typeof widget !== "string") {
     diagnostics.push(
       diagnostic(
@@ -395,7 +452,7 @@ function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
     )
   }
 
-  for (const [name, child] of Object.entries(uiNode)) {
+  for (const [name, child] of Object.entries(uiObject)) {
     if (name.startsWith("ui:")) continue
     const fieldSchema = fields.get(name)
     if (fieldSchema) {
@@ -422,7 +479,11 @@ function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
     }
     if (name === "definitions") {
       for (const [definitionName, definitionUi] of Object.entries(child ?? {})) {
-        const definitionSchema = rootSchema.definitions?.[definitionName]
+        const definitions = rootSchema.definitions
+        const definitionSchema =
+          definitions && typeof definitions === "object" && !Array.isArray(definitions)
+            ? (definitions as Record<string, unknown>)[definitionName]
+            : undefined
         if (!definitionSchema) {
           diagnostics.push(
             diagnostic(
@@ -456,8 +517,8 @@ function inspectUiNode(uiNode, schema, pointer, rootSchema, diagnostics) {
   }
 }
 
-function profileDiagnostics(document) {
-  const diagnostics = []
+function profileDiagnostics(document: CoreV1Document): ConformanceDiagnostic[] {
+  const diagnostics: ConformanceDiagnostic[] = []
   const schema = document.form.schema
 
   if (schema.$schema !== FORM_SCHEMA_DIALECT) {
@@ -473,7 +534,7 @@ function profileDiagnostics(document) {
   }
 
   if (!formSchemaAjv.validateSchema(schema)) {
-    return formSchemaAjv.errors.map((error) =>
+    return (formSchemaAjv.errors ?? []).map((error) =>
       diagnostic(
         "form-schema",
         "FORM_SCHEMA_INVALID",
@@ -532,7 +593,7 @@ function profileDiagnostics(document) {
   }
   if (
     document.metadata.status === "published" &&
-    Date.parse(document.metadata.publishedAt) < createdAt
+    Date.parse(document.metadata.publishedAt ?? "") < createdAt
   ) {
     diagnostics.push(
       diagnostic(
@@ -547,13 +608,13 @@ function profileDiagnostics(document) {
   return diagnostics
 }
 
-export function validateCoreV1(document) {
+export function validateCoreV1(document: unknown): ConformanceDiagnostic[] {
   const outerDiagnostics = packageDiagnostics(document)
   if (outerDiagnostics.length) return outerDiagnostics
-  return profileDiagnostics(document)
+  return profileDiagnostics(document as CoreV1Document)
 }
 
-export function validateFieldPointer(formSchema, pointer) {
+export function validateFieldPointer(formSchema: unknown, pointer: string): boolean {
   if (typeof pointer !== "string" || !pointer.startsWith("/properties/")) return false
   const target = resolveLocalReference(formSchema, `#${pointer}`)
   if (!target || typeof target !== "object" || Array.isArray(target)) return false
@@ -575,13 +636,18 @@ export function validateFieldPointer(formSchema, pointer) {
   return true
 }
 
-export function validateSemantics(document, validator) {
-  if (document.semantics === undefined) return null
+export function validateSemantics(
+  document: unknown,
+  validator?: SemanticsValidator,
+): SemanticsValidationResult | null {
+  if (!document || typeof document !== "object") return null
+  const candidate = document as { semantics?: unknown }
+  if (candidate.semantics === undefined) return null
   if (!validator) {
     return { profile: SEMANTIC_PROFILE_URI, status: "unrecognized", diagnostics: [] }
   }
 
-  const diagnostics = validator(document.semantics, document) ?? []
+  const diagnostics = validator(candidate.semantics, document) ?? []
   return {
     profile: SEMANTIC_PROFILE_URI,
     status: diagnostics.length ? "invalid" : "valid",

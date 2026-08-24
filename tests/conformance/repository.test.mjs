@@ -55,3 +55,32 @@ test("normative artifacts do not contain placeholder canonical URIs", async () =
     }
   }
 })
+
+test("the portable TypeScript runtime has no Node or application imports", async () => {
+  const runtimeSourceRoot = path.join(
+    repositoryRoot,
+    "implementations",
+    "typescript",
+    "src",
+  )
+  const forbiddenImports = [
+    /(?:from\s+|import\s+)["']node:/u,
+    /["']@prisma\//u,
+    /["']@rjsf\//u,
+    /["']next\//u,
+  ]
+
+  for (const file of await findFiles(runtimeSourceRoot)) {
+    if (!file.endsWith(".ts") || file.includes(`${path.sep}generated${path.sep}`)) {
+      continue
+    }
+    const content = await readFile(file, "utf8")
+    for (const forbiddenImport of forbiddenImports) {
+      assert.equal(
+        forbiddenImport.test(content),
+        false,
+        `${path.relative(repositoryRoot, file)} matches ${forbiddenImport}`,
+      )
+    }
+  }
+})

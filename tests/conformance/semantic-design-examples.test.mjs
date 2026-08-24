@@ -7,10 +7,10 @@ import Ajv2020 from "ajv/dist/2020.js"
 import addFormats from "ajv-formats"
 import {
   SEMANTIC_PROFILE_URI,
+  projectSemanticV1,
   validateCoreV1,
-} from "../../scripts/core-v1-conformance.mjs"
-import { validateSemanticV1 } from "../../scripts/semantic-v1-conformance.mjs"
-import { projectSemanticV1 } from "../../scripts/semantic-v1-projector.mjs"
+  validateSemanticV1,
+} from "@staple-verse/marker-template-runtime"
 
 const exampleRoot = path.join(process.cwd(), "examples", "semantic", "v1")
 const semanticSchemaPath = path.join(

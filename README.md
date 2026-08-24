@@ -23,7 +23,8 @@ spec/       Human-readable normative specification
 schemas/    Machine-readable normative schemas
 fixtures/   Valid, invalid, and application-capability fixtures
 examples/   Explanatory, non-normative examples
-scripts/    Staged conformance validation used by CI
+implementations/ Optional, non-normative language implementations
+scripts/    Repository validation and generation tools
 tests/      Profile and cross-component conformance checks
 ```
 
@@ -41,13 +42,20 @@ requirements of their own.
 
 ## Distribution
 
-This repository is not an npm package and does not distribute a runtime
-validation library. Released specifications and schemas are versioned,
-implementation-independent files. MARKER, STAPLE, and third-party consumers
-can validate documents with an appropriate JSON Schema implementation.
+The specification itself is not an npm package. Released specifications,
+schemas, algorithms, diagnostics, and fixtures remain versioned,
+implementation-independent artifacts.
 
-Ajv and the scripts in this repository are reference conformance tooling, not
-runtime requirements for consumers.
+The repository additionally contains an optional TypeScript implementation in
+[`implementations/typescript`](implementations/typescript). It provides the
+portable Core and Semantic validation and Semantic projection logic needed by
+JavaScript applications. It is an implementation of the contract, not an
+additional source of normative requirements. Non-JavaScript consumers may
+implement the same contract and verify it against the same fixtures.
+
+The runtime package is private while V1 is under development and is not yet
+published. Application database access, authorization, persistence, rendering,
+and legacy migration remain outside this repository.
 
 ## Validation
 
@@ -58,7 +66,8 @@ npm ci
 npm run check
 ```
 
-`validate:schema` checks the normative JSON Schema artifacts. `validate:rules`
+The validation command first builds the TypeScript runtime. `validate:schema`
+checks the normative JSON Schema artifacts. `validate:rules`
 checks valid and invalid packages, the Core subset, cross-component references,
 field pointers, semantic dispatch and component shape, diagnostic contracts,
 design examples, and capability fixtures.
