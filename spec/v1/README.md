@@ -1,6 +1,7 @@
 # MARKER Metadata Template Specification — Core V1
 
-> **Status:** Normative Core V1
+> **Status:** V1 release candidate. This document is normative for each exact
+> tagged candidate, but final production-stable V1 has not yet been declared.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**,
 and **MAY** in this document are to be interpreted as described by RFC 2119 and
@@ -24,9 +25,13 @@ The validating package schema `$id` is:
 https://staplescience.com/schemas/marker-template/core/v1/package.schema.json
 ```
 
-These identifiers are versioned and MUST NOT be reassigned to an incompatible
-contract. Editorial corrections that do not change conformance MAY be
-published at the same locations.
+These are the target V1 identifiers. During the release-candidate period,
+consumers MUST pin the exact tagged candidate that defines the contract they
+implement. An incompatible candidate change requires a new immutable
+prerelease tag and release asset and MUST be reported in the changelog. After
+final `v1.0.0` is declared, these identifiers MUST NOT be reassigned to an
+incompatible contract. Editorial corrections that do not change conformance
+MAY be published at the same locations.
 
 ## 2. Package structure and conformance declaration
 

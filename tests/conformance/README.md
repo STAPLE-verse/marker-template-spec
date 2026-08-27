@@ -7,9 +7,9 @@ solely by the outer package schema:
 - the supported form keyword, format, reference, and array subset;
 - UI-schema references and order integrity;
 - lifecycle identity and timestamp rules;
-- RFC 6901 field-address validation; and
+- RFC 6901 field-address validation;
 - separate Semantic V1 dispatch;
-- Semantic V1 component-shape validation; and
+- Semantic V1 component-shape validation;
 - Semantic V1 field resolution, binding compatibility, exact mapping, and node
   ownership rules; and
 - deterministic, atomic Semantic V1 expanded JSON-LD projection.

@@ -1,9 +1,10 @@
 # MARKER Metadata Template Specification — Semantic V1 Scope
 
-> **Status:** Complete profile draft. This document defines the boundary,
-> binding vocabulary, component JSON Schema, cross-component validation rules,
-> deterministic projection algorithm, and diagnostic contracts of a lean
-> Semantic V1 profile.
+> **Status:** V1 release candidate. This document is normative for each exact
+> tagged candidate and defines the boundary, binding vocabulary, component JSON
+> Schema, cross-component validation rules, deterministic projection algorithm,
+> and diagnostic contracts of the lean Semantic V1 profile. Final
+> production-stable V1 has not yet been declared.
 
 Semantic V1 is an optional profile for attaching machine-interpretable meaning
 to fields in a Core V1 MARKER metadata-template package and deterministically

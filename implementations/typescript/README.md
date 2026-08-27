@@ -8,9 +8,12 @@ remain at the repository root. This package provides reusable structural and
 cross-component validation and Semantic V1 projection. It contains no Prisma,
 RJSF, application authorization, or persistence logic.
 
-The package is private during specification development and is not yet
-published. Its version describes the implementation release, not the Core or
-Semantic profile version it supports.
+The package is private until the first V1 release candidate is prepared. Its
+first published build should use the matching exact prerelease version, such as
+`1.0.0-rc.1`, under an npm prerelease tag rather than `latest`. Consumers must
+pin that exact version instead of depending on a sibling checkout or mutable
+branch. Its version describes the implementation release; the package
+documentation declares the exact Core and Semantic profile release it supports.
 
 ## Public API
 

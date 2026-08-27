@@ -6,15 +6,22 @@ fixtures, and examples.
 
 ## Status
 
-Core V1 is normative. Its profile URI, package-schema `$id`, package property
-names, embedded form dialect, lifecycle metadata, field-addressing rules, and
-semantic boundary are frozen in [`spec/v1/README.md`](spec/v1/README.md).
+Core V1 and Semantic V1 form the **V1 release candidate**. Their profile URIs,
+schemas, package vocabulary, validation rules, diagnostics, and Semantic V1
+projection algorithm define the normative contract of each tagged candidate.
+They are complete enough for application integration, but are not yet declared
+production-stable V1.
 
-Semantic V1's component vocabulary, JSON Schema, cross-component validation,
-expanded JSON-LD projection algorithm, and diagnostics are normative.
-Core reserves `/semantics` and dispatches it separately. The processing model,
-field resolution, node ownership, literal defaults, and deferred features are
-recorded in the [`Semantic V1 scope draft`](spec/semantic/v1/README.md).
+Candidate releases use semantic prerelease tags such as `v1.0.0-rc.1`.
+Consumers must pin an exact candidate release. Integration findings may produce
+an incompatible `rc.2`; no candidate is silently replaced. Final `v1.0.0` will
+be declared only after the candidate has been integrated and verified in
+STAPLE, Form Studio, and MARKER.
+
+Core V1 is defined in [`spec/v1/README.md`](spec/v1/README.md). Semantic V1's
+processing model, field resolution, node ownership, literal defaults,
+projection behavior, and deferred features are defined in
+[`spec/semantic/v1/README.md`](spec/semantic/v1/README.md).
 
 ## Repository contents
 
@@ -53,9 +60,17 @@ JavaScript applications. It is an implementation of the contract, not an
 additional source of normative requirements. Non-JavaScript consumers may
 implement the same contract and verify it against the same fixtures.
 
-The runtime package is private while V1 is under development and is not yet
-published. Application database access, authorization, persistence, rendering,
-and legacy migration remain outside this repository.
+The runtime package remains private until the first candidate is prepared. The
+first published build should use the matching exact prerelease version, such as
+`@staple-verse/marker-template-runtime@1.0.0-rc.1`, and a prerelease npm tag
+such as `rc` or `next`; it must not replace `latest`. Its version identifies the
+runtime release, while its documentation declares which profile release it
+implements. Application database access, authorization, persistence,
+rendering, and legacy migration remain outside this repository.
+
+During integration, applications must consume a released runtime version. A
+sibling checkout, mutable Git branch, or untracked `node_modules` symlink is
+not a reproducible application dependency.
 
 ## Validation
 
@@ -93,5 +108,6 @@ cd ../STAPLE && npm run test:marker-template-capabilities
 
 ## Licensing
 
-The repository's public-release license must be selected before distributing a
-tagged release. That administrative choice does not alter Core V1 conformance.
+The repository's public-release license must be selected before distributing
+the first tagged release candidate. That administrative choice does not alter
+Core or Semantic conformance.

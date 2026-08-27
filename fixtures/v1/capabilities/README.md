@@ -1,8 +1,8 @@
 # V1 capability fixtures
 
-These small fixtures are non-normative probes for form capabilities being
-considered for MARKER Template Profile V1. They are intentionally independent
-of the unfinished outer MARKER template-document shape.
+These small fixtures are non-normative probes for application compatibility
+with the MARKER V1 release candidate. They are intentionally independent of
+the normative outer MARKER template-package shape.
 
 Each JSON file contains one focused draft-07 `schema`, its RJSF `uiSchema`,
 valid and invalid metadata-instance examples, and observed or intended
@@ -25,9 +25,8 @@ target to distinguish lossless pass-through from visual editing support. A
 construct may therefore be `unsupported` for visual authoring while still
 being required to pass round-trip preservation.
 
-These expectations do not decide Core conformance. The fixtures become
-normative only after the V1 Core and application-compatibility rules are
-frozen.
+These expectations do not decide Core conformance and do not become normative
+parts of Core V1. They record version-specific application evidence.
 
 ## Initial version matrix
 
@@ -57,15 +56,15 @@ STAPLE deployment profile may be defined separately if it becomes necessary.
 - STAPLE runs its RJSF 5 preprocessing, rendering, and instance-validation
   integration checks with `npm run test:marker-template-capabilities`.
 
-Both consumers read this directory through `MARKER_TEMPLATE_SPEC_ROOT`. Local
-development falls back to a sibling `marker-template-spec` checkout. Cross-repository
-CI wiring is deferred until the V1 fixture suite has a commit or release that
-the consuming application can pin explicitly.
+Both consumers currently read this directory through
+`MARKER_TEMPLATE_SPEC_ROOT`; local development may fall back to a sibling
+checkout. Released integrations must instead pin immutable candidate artifacts.
+Cross-repository CI wiring is deferred until those artifacts are available.
 
 The matrix was reverified on 2026-08-05: Form Studio passed 65 compatibility
-tests and STAPLE passed all 16 capability fixtures. The reproducible commands
-are `npm test` in `form-studio` and
-`npm run test:marker-template-capabilities` in `STAPLE`.
+tests and STAPLE passed its 16-test capability suite (15 fixtures plus a
+version-coordinate check). The reproducible commands are `npm test` in
+`form-studio` and `npm run test:marker-template-capabilities` in `STAPLE`.
 
 Initial fixtures:
 

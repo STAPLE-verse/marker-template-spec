@@ -1,6 +1,6 @@
 {
   "name": "@staple-verse/marker-template-runtime",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "description": "Optional TypeScript runtime for the MARKER Metadata Template Specification",
   "type": "module",

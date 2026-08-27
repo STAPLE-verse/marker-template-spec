@@ -15,9 +15,26 @@ MARKER Metadata Template Specification. A normative pull request should:
 4. document expected diagnostics; and
 5. state whether the change is compatible with the current profile version.
 
-After V1 is declared normative, a breaking contract change requires a new
-profile version and new canonical identifiers. Published versioned schemas must
-remain available.
+During the release-candidate period, a breaking contract change requires a new
+immutable prerelease tag, updated fixtures and changelog, and explicit consumer
+upgrades. Consumers must pin an exact candidate rather than a branch or moving
+tag. After final `v1.0.0` is declared, a breaking contract change requires a
+new profile version and new canonical identifiers. Published candidate and
+final versioned artifacts must remain available.
+
+## Release candidates
+
+Candidate releases use tags such as `v1.0.0-rc.1` and are marked as
+prereleases. The TypeScript runtime uses the matching prerelease version and is
+published under `rc` or `next`, never `latest`. A candidate is promoted to
+final V1 only after clean, pinned integrations pass in this order:
+
+1. STAPLE;
+2. Form Studio; and
+3. MARKER.
+
+Integration failures may reveal specification defects, but application-specific
+database, UI, or migration behavior must not be added to the portable contract.
 
 ## Non-normative changes
 

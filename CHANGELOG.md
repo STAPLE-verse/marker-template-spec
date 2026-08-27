@@ -5,6 +5,15 @@ documented here.
 
 ## Unreleased
 
+## 1.0.0-rc.1 - 2026-08-27
+
+- Classified the complete Core V1 and Semantic V1 contracts as a V1 release
+  candidate rather than a production-stable final release.
+- Defined exact prerelease pinning and sequential STAPLE, Form Studio, and
+  MARKER integration as the promotion gate for final `v1.0.0`.
+- Kept application persistence, authorization, rendering, and migration outside
+  the portable specification and prohibited mutable sibling-source dependencies
+  for reproducible integration releases.
 - Froze the normative Core V1 profile and package-schema identifiers under
   `staplescience.com`.
 - Defined the `conformsTo`, `metadata`, `form`, and optional `semantics`
