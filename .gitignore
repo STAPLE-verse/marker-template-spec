@@ -4,3 +4,4 @@ coverage/
 .DS_Store
 implementations/typescript/dist/
 implementations/typescript/src/generated/
+*.tgz
