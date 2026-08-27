@@ -7,7 +7,11 @@ export {
   validateFieldPointer,
   validateSemantics,
 } from "./core.js"
-export { validateSemanticV1 } from "./semantic.js"
+export {
+  analyzeSemanticV1Bindings,
+  findAncestorNodeBindings,
+  validateSemanticV1,
+} from "./semantic.js"
 export { projectSemanticV1 } from "./projector.js"
 export { coreV1PackageSchema, semanticV1ComponentSchema } from "./generated/schemas.js"
 export type {
@@ -38,3 +42,10 @@ export type {
   TemplatePublisher,
 } from "./types.js"
 export type { SemanticsValidationResult, SemanticsValidator } from "./core.js"
+export type {
+  FieldResolutionStatus,
+  JsonSchemaNode,
+  SemanticAncestorNodeBinding,
+  SemanticBindingAnalysis,
+  TypedValueSchema,
+} from "./semantic.js"

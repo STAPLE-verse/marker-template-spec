@@ -5,6 +5,22 @@ documented here.
 
 ## Unreleased
 
+## 1.0.0-rc.2 - 2026-08-27
+
+- Exported `analyzeSemanticV1Bindings` and its `SemanticBindingAnalysis` result
+  type from the TypeScript runtime's public entry point, so consumers can
+  resolve a Semantic V1 field pointer and its effective Core value type
+  without reimplementing the runtime's local-`$ref` and schema-variant
+  resolution.
+- Added `findAncestorNodeBindings`, a standalone, non-normative query that
+  returns the `node` bindings structurally containing a given field pointer,
+  nearest first. It shares its containment logic with `validateSemanticV1`'s
+  node-ownership check, so the entry it marks `nearest` always agrees with
+  what the runtime itself will accept as a conformant `parentNodePointer`.
+- Exported the supporting `FieldResolutionStatus`, `JsonSchemaNode`,
+  `TypedValueSchema`, and `SemanticAncestorNodeBinding` types alongside the
+  above.
+
 ## 1.0.0-rc.1 - 2026-08-27
 
 - Classified the complete Core V1 and Semantic V1 contracts as a V1 release

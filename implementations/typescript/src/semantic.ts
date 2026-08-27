@@ -4,14 +4,15 @@ import type {
   ConformanceDiagnostic,
   JsonPrimitive,
   SemanticBinding,
+  SemanticNodeBinding,
   SemanticV1Component,
 } from "./types.js"
 
-type JsonSchemaNode = Record<string, unknown>
+export type JsonSchemaNode = Record<string, unknown>
 type ScalarType = "boolean" | "integer" | "number" | "string"
-type FieldResolutionStatus = "invalid" | "cycle" | "unresolved" | "resolved"
+export type FieldResolutionStatus = "invalid" | "cycle" | "unresolved" | "resolved"
 
-interface TypedValueSchema extends JsonSchemaNode {
+export interface TypedValueSchema extends JsonSchemaNode {
   type: string
   format?: string
   enum?: JsonPrimitive[]
@@ -622,6 +623,64 @@ function isStrictPointerAncestor(ancestorTokens: string[], childTokens: string[]
   )
 }
 
+interface AncestorNodeCandidate {
+  index: number
+  binding: SemanticNodeBinding
+  tokens: string[]
+}
+
+function ancestorNodeCandidates(
+  bindings: SemanticBinding[],
+  childTokens: string[],
+): AncestorNodeCandidate[] {
+  return bindings
+    .map((binding, index) => ({
+      binding,
+      index,
+      tokens: parseFieldPointer(binding.fieldPointer),
+    }))
+    .filter((candidate): candidate is AncestorNodeCandidate => {
+      return (
+        candidate.binding.valueKind === "node" &&
+        candidate.tokens !== undefined &&
+        isStrictPointerAncestor(candidate.tokens, childTokens)
+      )
+    })
+    .sort((left, right) => right.tokens.length - left.tokens.length)
+}
+
+export interface SemanticAncestorNodeBinding {
+  index: number
+  binding: SemanticNodeBinding
+  /** True for the single ancestor that a conformant `parentNodePointer` must identify. */
+  nearest: boolean
+}
+
+/**
+ * Returns every `node` binding that structurally contains `fieldPointer`, nearest
+ * first. Per the Semantic V1 nearest-containing-node rule, only the first (nearest)
+ * entry is a valid `parentNodePointer` target; the rest are included so a caller can
+ * present them as context (e.g. a disabled or warned choice) without recomputing
+ * pointer-ancestor containment itself.
+ *
+ * This is the same primitive `validateSemanticV1` uses to enforce node ownership, so
+ * a value this function recommends as `nearest` always agrees with the runtime's own
+ * validation of that same `parentNodePointer`.
+ */
+export function findAncestorNodeBindings(
+  bindings: SemanticBinding[],
+  fieldPointer: string,
+): SemanticAncestorNodeBinding[] {
+  const childTokens = parseFieldPointer(fieldPointer)
+  if (!childTokens) return []
+
+  return ancestorNodeCandidates(bindings, childTokens).map((candidate, position) => ({
+    index: candidate.index,
+    binding: candidate.binding,
+    nearest: position === 0,
+  }))
+}
+
 function validateNodeOwnership(
   bindings: SemanticBinding[],
   resolved: ResolvedBinding[],
@@ -647,22 +706,7 @@ function validateNodeOwnership(
   for (const [index, binding] of bindings.entries()) {
     const childTokens = resolved[index]?.tokens
     if (!childTokens) continue
-    const containingNodes = bindings
-      .map((candidate, candidateIndex) => ({ candidate, candidateIndex }))
-      .filter(
-        ({ candidate, candidateIndex }) =>
-          candidate.valueKind === "node" &&
-          resolved[candidateIndex]?.tokens !== undefined &&
-          isStrictPointerAncestor(resolved[candidateIndex].tokens, childTokens),
-      )
-      .sort(
-        (left, right) => {
-          const rightLength = resolved[right.candidateIndex]?.tokens?.length ?? 0
-          const leftLength = resolved[left.candidateIndex]?.tokens?.length ?? 0
-          return rightLength - leftLength
-        },
-      )
-    const nearest = containingNodes[0]
+    const nearest = ancestorNodeCandidates(bindings, childTokens)[0]
 
     if (binding.parentNodePointer === undefined) {
       if (nearest) {
@@ -670,7 +714,7 @@ function validateNodeOwnership(
           diagnostic(
             "SEMANTIC_PARENT_REQUIRED",
             bindingPointer(index, "parentNodePointer"),
-            `The nearest containing node is ${nearest.candidate.fieldPointer}`,
+            `The nearest containing node is ${nearest.binding.fieldPointer}`,
           ),
         )
       }
@@ -727,7 +771,7 @@ function validateNodeOwnership(
       )
       continue
     }
-    if (!nearest || nearest.candidateIndex !== parentIndex) {
+    if (!nearest || nearest.index !== parentIndex) {
       diagnostics.push(
         diagnostic(
           nearest
@@ -735,7 +779,7 @@ function validateNodeOwnership(
             : "SEMANTIC_PARENT_OUTSIDE_NODE",
           bindingPointer(index, "parentNodePointer"),
           nearest
-            ? `parentNodePointer must identify the nearest node ${nearest.candidate.fieldPointer}`
+            ? `parentNodePointer must identify the nearest node ${nearest.binding.fieldPointer}`
             : "The child field is not contained by the identified node field",
         ),
       )
