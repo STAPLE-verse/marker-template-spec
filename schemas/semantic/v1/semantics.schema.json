@@ -177,17 +177,36 @@
       }
     },
     "binding": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/literalBinding"
+      "description": "Dispatches on valueKind so an invalid binding is checked against its one intended kind-specific shape instead of accumulating unrelated failures from the other two kinds.",
+      "if": {
+        "type": "object",
+        "properties": {
+          "valueKind": {
+            "const": "literal"
+          }
         },
-        {
-          "$ref": "#/$defs/iriBinding"
+        "required": ["valueKind"]
+      },
+      "then": {
+        "$ref": "#/$defs/literalBinding"
+      },
+      "else": {
+        "if": {
+          "type": "object",
+          "properties": {
+            "valueKind": {
+              "const": "node"
+            }
+          },
+          "required": ["valueKind"]
         },
-        {
+        "then": {
           "$ref": "#/$defs/nodeBinding"
+        },
+        "else": {
+          "$ref": "#/$defs/iriBinding"
         }
-      ]
+      }
     }
   }
 }

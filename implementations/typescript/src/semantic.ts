@@ -112,7 +112,14 @@ function diagnostic(
 
 function componentDiagnostics(semantics: unknown): ConformanceDiagnostic[] {
   if (validateComponent(semantics)) return []
-  return (validateComponent.errors ?? []).map((error) => {
+  // AJV's own "if" keyword error only restates that the matched "then"/"else"
+  // branch failed (schemaPath "#/if", e.g. once binding.valueKind selects a
+  // kind-specific shape); the branch's own errors always accompany it with
+  // the actual cause, so this wrapper is redundant noise, never the sole
+  // diagnostic for a failure.
+  const rawErrors = validateComponent.errors ?? []
+  const errors = rawErrors.filter((error) => error.keyword !== "if")
+  return (errors.length > 0 ? errors : rawErrors).map((error) => {
     const pointer =
       error.keyword === "required"
         ? childPointer(`/semantics${error.instancePath}`, error.params.missingProperty)

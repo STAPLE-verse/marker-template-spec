@@ -5,6 +5,22 @@ documented here.
 
 ## Unreleased
 
+## 1.0.0-rc.3 - 2026-08-28
+
+- Replaced the Semantic V1 component schema's plain `oneOf` over the
+  `literal`/`iri`/`node` binding shapes with an `if`/`then`/`else` dispatch
+  keyed on the binding's own `valueKind`. A binding is now checked only
+  against its one intended kind-specific shape, so an invalid binding (for
+  example a malformed `predicate`) produces one relevant
+  `SEMANTIC_COMPONENT_INVALID` diagnostic instead of duplicated and
+  contradictory errors accumulated from the other two, inapplicable kinds.
+  Which documents are valid or invalid is unchanged; only the shape and
+  volume of the reported errors for an already-invalid binding improves.
+- Filtered AJV's own `if`-keyword wrapper error out of
+  `SEMANTIC_COMPONENT_INVALID` diagnostics, since it only restates that the
+  dispatched branch failed and always accompanies the branch's own, more
+  specific error.
+
 ## 1.0.0-rc.2 - 2026-08-27
 
 - Exported `analyzeSemanticV1Bindings` and its `SemanticBindingAnalysis` result
