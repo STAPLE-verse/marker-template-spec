@@ -5,6 +5,23 @@ documented here.
 
 ## Unreleased
 
+## 1.0.0-rc.4 - 2026-09-05
+
+- Removed the requirement that a published package credit at least one
+  contributor with the `Creator` role. A published package still needs a
+  non-empty `contributors` array, but no specific role among them is
+  mandatory. `Creator` remains a recognized role with special meaning when a
+  contributor uses it (publication exporters may still derive creator lists
+  from it), but Core V1 itself no longer enforces its presence. Decided ahead
+  of the V1 release, not after: the requirement had no consumer yet (no
+  DataCite/CEDAR exporter exists), and mandating a specific contributor role
+  ahead of a concrete integration need would have imposed a role ontology on
+  every publisher rather than leaving that decision to applications or a
+  later profile that actually needs it. Moved
+  `fixtures/v1/invalid/package/published-missing-creator-role.json` to
+  `fixtures/v1/valid/published-without-creator-role.json` to cover the
+  reversal.
+
 ## 1.0.0-rc.3 - 2026-08-28
 
 - Replaced the Semantic V1 component schema's plain `oneOf` over the

@@ -198,18 +198,6 @@
                 "minItems": 1,
                 "items": {
                   "$ref": "#/$defs/publishedContributor"
-                },
-                "contains": {
-                  "type": "object",
-                  "properties": {
-                    "roles": {
-                      "type": "array",
-                      "contains": {
-                        "const": "Creator"
-                      }
-                    }
-                  },
-                  "required": ["roles"]
                 }
               }
             }

@@ -8,8 +8,8 @@
     "version": "1.0.0",
     "status": "published",
     "resourceType": "MetadataTemplate",
-    "title": "Missing creator credit",
-    "description": "A published package must credit at least one contributor as a creator.",
+    "title": "Published without a Creator role",
+    "description": "A published package does not need any contributor credited with the Creator role.",
     "language": "en",
     "contributors": [
       {

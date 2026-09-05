@@ -126,7 +126,6 @@ A published package additionally requires:
 - a non-empty `description`;
 - a BCP 47 `language` tag describing its labels and documentation;
 - a non-empty `contributors` array;
-- at least one contributor with the exact role `Creator`;
 - `publisher`;
 - `license`; and
 - `publishedAt`.
@@ -146,11 +145,14 @@ contributor collections. A contributor MUST have a non-empty `name`. Every
 contributor in a published package MUST have one or more unique, non-empty
 `roles`. A contributor MAY perform multiple roles.
 
-`Creator` is the only role with special Core V1 meaning. It identifies people
-or organizations primarily responsible for the intellectual content and lets
-publication exporters derive creator lists required by external catalog
-standards. Other role strings are preserved; a downstream exporter maps known
-roles to its vocabulary and handles unknown roles explicitly.
+`Creator` is the only role with special Core V1 meaning, when a contributor
+uses it. It identifies people or organizations primarily responsible for the
+intellectual content and lets publication exporters derive creator lists
+required by external catalog standards. Core V1 does not require any
+contributor to hold this role; an application or a later profile MAY require
+it for its own purposes. Other role strings are preserved; a downstream
+exporter maps known roles to its vocabulary and handles unknown roles
+explicitly.
 
 `nameType` (`Personal` or `Organizational`), `givenName`, `familyName`,
 identifiers, and affiliations are optional. Contributor identifiers are
