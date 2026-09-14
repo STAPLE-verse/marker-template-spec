@@ -366,21 +366,21 @@ Any projection diagnostic makes the projection result absent.
 ## Normative artifacts
 
 The examples-first milestone established the binding vocabulary encoded by the
-normative [Semantic V1 component schema](../../../schemas/semantic/v1/semantics.schema.json).
+normative [Semantic V1 component schema](https://staplescience.com/schemas/marker-template/semantic/v1/semantics.schema.json).
 The first five non-normative scenarios are maintained in
-[`examples/semantic/v1/`](../../../examples/semantic/v1/). They cover the title,
+[`examples/semantic/v1/`](https://github.com/STAPLE-verse/marker-template-spec/tree/v1.0.0/examples/semantic/v1). They cover the title,
 default date datatype, direct ORCID IRI, exact local value-to-IRI mapping, and
 repeated contributors through a local `$ref`.
 
 The optional TypeScript
-[Semantic V1 validator](../../../implementations/typescript/src/semantic.ts) implements
+[Semantic V1 validator](https://github.com/STAPLE-verse/marker-template-spec/blob/v1.0.0/implementations/typescript/src/semantic.ts) implements
 component-shape validation, absolute-IRI and field-pointer checks, deterministic
 local `$ref` traversal, effective field-type compatibility, exact mapping rules,
 and node ownership with stable diagnostics. Its behavior is exercised by the
 cross-component conformance tests.
 
 The optional TypeScript
-[Semantic V1 projector](../../../implementations/typescript/src/projector.ts) implements
+[Semantic V1 projector](https://github.com/STAPLE-verse/marker-template-spec/blob/v1.0.0/implementations/typescript/src/projector.ts) implements
 the algorithm above. The design examples fix complete expected expanded
 JSON-LD graphs, while the projector conformance tests cover number, boolean,
 `false`, `0`, empty-string, missing, and `null` behavior; scalar arrays; inline
@@ -388,6 +388,6 @@ nested objects; fixed languages; explicit datatypes; invalid response IRIs;
 unmapped values; and atomic failure.
 
 The same edge cases are published as implementation-independent
-[portable projection fixtures](../../../fixtures/semantic/v1/README.md). The
+[portable projection fixtures](https://github.com/STAPLE-verse/marker-template-spec/blob/v1.0.0/fixtures/semantic/v1/README.md). The
 optional local `npm run validate:jsonld` command checks their expected and
 projected graphs with an independent JSON-LD 1.1 processor.
