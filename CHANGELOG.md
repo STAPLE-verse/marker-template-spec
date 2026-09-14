@@ -5,6 +5,13 @@ documented here.
 
 ## Unreleased
 
+## 1.0.0 - 2026-09-14
+
+Declared production-stable per the promotion gate in
+[CONTRIBUTING.md](CONTRIBUTING.md): the candidate has been integrated in
+STAPLE, Form Studio, and MARKER. No contract changes relative to
+`1.0.0-rc.4` — this release freezes that content as final.
+
 ## 1.0.0-rc.4 - 2026-09-05
 
 - Removed the requirement that a published package credit at least one

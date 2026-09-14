@@ -1,7 +1,7 @@
 # MARKER Metadata Template Specification — Core V1
 
-> **Status:** V1 release candidate. This document is normative for each exact
-> tagged candidate, but final production-stable V1 has not yet been declared.
+> **Status:** Production-stable V1, declared final as `v1.0.0`. This document
+> is normative for this release.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**,
 and **MAY** in this document are to be interpreted as described by RFC 2119 and

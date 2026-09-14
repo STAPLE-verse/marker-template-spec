@@ -6,17 +6,17 @@ fixtures, and examples.
 
 ## Status
 
-Core V1 and Semantic V1 form the **V1 release candidate**. Their profile URIs,
-schemas, package vocabulary, validation rules, diagnostics, and Semantic V1
-projection algorithm define the normative contract of each tagged candidate.
-They are complete enough for application integration, but are not yet declared
-production-stable V1.
+Core V1 and Semantic V1 are **production-stable V1**, declared final as
+`v1.0.0`. Their profile URIs, schemas, package vocabulary, validation rules,
+diagnostics, and Semantic V1 projection algorithm define the normative
+contract of this release.
 
-Candidate releases use semantic prerelease tags such as `v1.0.0-rc.1`.
-Consumers must pin an exact candidate release. Integration findings may produce
-an incompatible `rc.2`; no candidate is silently replaced. Final `v1.0.0` will
-be declared only after the candidate has been integrated and verified in
-STAPLE, Form Studio, and MARKER.
+`v1.0.0` carries no contract changes beyond `v1.0.0-rc.4` — the candidate
+period (`v1.0.0-rc.1` through `rc.4`) produced the integration findings that
+shaped Core V1 and Semantic V1; final V1 freezes that content rather than
+introducing new changes at declaration time. Consumers must pin an exact
+released version. A breaking contract change after `v1.0.0` requires a new
+profile version and new canonical identifiers, per [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Core V1 is defined in [`spec/v1/README.md`](spec/v1/README.md). Semantic V1's
 processing model, field resolution, node ownership, literal defaults,
@@ -60,13 +60,14 @@ JavaScript applications. It is an implementation of the contract, not an
 additional source of normative requirements. Non-JavaScript consumers may
 implement the same contract and verify it against the same fixtures.
 
-The runtime package remains private until the first candidate is prepared. The
-first published build should use the matching exact prerelease version, such as
-`@staple-verse/marker-template-runtime@1.0.0-rc.1`, and a prerelease npm tag
-such as `rc` or `next`; it must not replace `latest`. Its version identifies the
-runtime release, while its documentation declares which profile release it
-implements. Application database access, authorization, persistence,
-rendering, and legacy migration remain outside this repository.
+The runtime package remains private. Published builds during the candidate
+period (`v1.0.0-rc.1` through `rc.4`) used the matching exact prerelease
+version under a prerelease tag such as `rc` or `next`, never `latest`. The
+first stable build, `@staple-verse/marker-template-runtime@1.0.0`, may now
+carry the `latest` tag. Its version identifies the runtime release, while its
+documentation declares which profile release it implements. Application
+database access, authorization, persistence, rendering, and legacy migration
+remain outside this repository.
 
 During integration, applications must consume a released runtime version. A
 sibling checkout, mutable Git branch, or untracked `node_modules` symlink is
