@@ -1,0 +1,39 @@
+{
+  "id": "enum-names",
+  "description": "An enumerated choice whose display labels differ from the stored values.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "access": {
+        "type": "string",
+        "title": "Access",
+        "enum": ["open", "restricted", "closed"],
+        "enumNames": ["Open to all", "Restricted to members", "Closed"]
+      },
+      "methods": {
+        "type": "array",
+        "title": "Methods",
+        "items": {
+          "type": "string",
+          "enum": ["survey", "interview"],
+          "enumNames": ["Survey", "Interview"]
+        },
+        "uniqueItems": true
+      }
+    },
+    "required": ["access"]
+  },
+  "uiSchema": {
+    "methods": { "ui:widget": "checkboxes" }
+  },
+  "instances": {
+    "valid": [{ "label": "stored values", "data": { "access": "open", "methods": ["survey"] } }],
+    "invalid": [{ "label": "display label instead of stored value", "data": { "access": "Open to all" } }]
+  },
+  "expectations": {
+    "rjsfRendering": { "status": "pass", "reason": "RJSF displays enumNames labels while storing the enum value." },
+    "formStudioAuthoring": { "status": "pass", "reason": "Studio's 'Display different text label' option writes enumNames." },
+    "stapleDeployment": { "status": "pass", "reason": "STAPLE forms using display labels use this representation." }
+  }
+}

@@ -11,6 +11,11 @@ documented here.
   using that field were rejected on import into MARKER. The change is
   additive: every previously conformant package remains conformant. Added
   the `checkboxes-widget` capability fixture.
+- Added `enumNames` to the Core V1 schema keyword allowlist. Form Studio
+  writes it (on a field, or on `items` for checkboxes) when options have a
+  display label different from the stored value, so STAPLE forms using that
+  option were rejected on import into MARKER. It is annotation-only and
+  additive. Added the `enum-names` capability fixture.
 
 ## 1.0.0 - 2026-09-14
 

@@ -192,6 +192,11 @@ objects; homogeneous arrays; constraints on those values; enumerations and
 constants; `allOf`, `anyOf`, `oneOf`, `not`, and `if`/`then`/`else` composition;
 draft-07 `dependencies`; annotations; and local references into `definitions`.
 
+The RJSF `enumNames` keyword is also permitted, as an array of display labels
+parallel to `enum`. It is presentation only: it never affects validation, and
+the stored value is always the `enum` entry. Form Studio writes it when an
+author gives options a display label different from the stored value.
+
 External references are not portable and MUST NOT be used. Every `$ref` MUST
 be a local fragment beginning `#/definitions/` and MUST resolve within the
 same form schema. Tuple validation (`items` as an array), custom formats, and

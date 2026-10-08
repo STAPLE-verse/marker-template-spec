@@ -74,6 +74,7 @@ Initial fixtures:
 | `numeric-constraints` | Integer and number constraints |
 | `boolean-field` | Boolean checkbox |
 | `enum-choice` | Enumerated choice |
+| `enum-names` | Enumerated choice with display labels |
 | `standard-formats` | Date, email, and URI formats |
 | `textarea-widget` | Portable multiline presentation in `uiSchema` |
 | `legacy-textarea-format` | Non-standard STAPLE `format: "textarea"` |

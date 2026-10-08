@@ -62,6 +62,7 @@ const allowedSchemaKeywords = new Set([
   "description",
   "else",
   "enum",
+  "enumNames",
   "examples",
   "exclusiveMaximum",
   "exclusiveMinimum",
