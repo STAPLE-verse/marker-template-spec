@@ -210,8 +210,8 @@ directives, not field names.
 
 Core V1 permits the portable RJSF directives exercised by the conformance
 suite. Widget names are restricted to `text`, `textarea`, `password`, `email`,
-`uri`, `date`, `date-time`, `alt-date`, `alt-datetime`, `checkbox`, `select`,
-`radio`, `hidden`, `updown`, and `range`. An implementation MAY preserve other
+`uri`, `date`, `date-time`, `alt-date`, `alt-datetime`, `checkbox`, `checkboxes`,
+`select`, `radio`, `hidden`, `updown`, and `range`. An implementation MAY preserve other
 UI directives, but a package using an unknown widget is not Core V1 conformant.
 
 Every string in `ui:order`, other than the single wildcard `*`, MUST name a

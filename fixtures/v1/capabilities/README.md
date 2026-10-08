@@ -78,6 +78,7 @@ Initial fixtures:
 | `textarea-widget` | Portable multiline presentation in `uiSchema` |
 | `legacy-textarea-format` | Non-standard STAPLE `format: "textarea"` |
 | `legacy-hidden-readonly-field` | Hidden read-only schema marker used by STAPLE built-ins |
+| `checkboxes-widget` | Multi-select array of enumerated strings |
 | `scalar-array` | Repeatable scalar field |
 | `object-array` | Repeatable structured section |
 | `nested-object` | Nested object section |

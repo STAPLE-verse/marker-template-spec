@@ -5,6 +5,13 @@ documented here.
 
 ## Unreleased
 
+- Added `checkboxes` to the Core V1 widget allowlist. It is the standard RJSF
+  widget for a multi-select array of enumerated strings, and Form Studio's
+  "Checkboxes (Multi-select)" field has always written it, so STAPLE forms
+  using that field were rejected on import into MARKER. The change is
+  additive: every previously conformant package remains conformant. Added
+  the `checkboxes-widget` capability fixture.
+
 ## 1.0.0 - 2026-09-14
 
 Declared production-stable per the promotion gate in

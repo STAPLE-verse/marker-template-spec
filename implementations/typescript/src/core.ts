@@ -108,6 +108,7 @@ const allowedWidgets = new Set([
   "alt-date",
   "alt-datetime",
   "checkbox",
+  "checkboxes",
   "date",
   "date-time",
   "email",
