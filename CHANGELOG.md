@@ -5,6 +5,12 @@ documented here.
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-09
+
+Additive changes to the Core V1 form schema profile. Every package that conformed
+to `1.0.0` still conforms; the profile URIs and package schema are unchanged. The
+typescript runtime is released as `@staple-verse/marker-template-runtime@1.1.0`.
+
 - Added `checkboxes` to the Core V1 widget allowlist. It is the standard RJSF
   widget for a multi-select array of enumerated strings, and Form Studio's
   "Checkboxes (Multi-select)" field has always written it, so STAPLE forms
